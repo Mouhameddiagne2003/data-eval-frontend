@@ -15,7 +15,7 @@ Plateforme d'évaluation automatisée des exercices de bases de données.
 ## Installation
 
 1. Clonez le dépôt :
-   git clone https://github.com/votre-utilisateur/data-eval-frontend.git
+   git clone https://github.com/Mouhameddiagne2003/data-eval-frontend.git
    cd data-eval-frontend
 
 2. Installer les dépendances
