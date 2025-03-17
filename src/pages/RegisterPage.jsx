@@ -109,13 +109,13 @@ function RegisterPage() {
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center bg-border-dark"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (
-                                    <EyeOff className="h-5 w-5 text-bg-light" />
+                                    <EyeOff className="h-5 w-5 text-data-teal" />
                                 ) : (
-                                    <Eye className="h-5 w-5 text-bg-light" />
+                                    <Eye className="h-5 w-5 text-data-teal" />
                                 )}
                             </button>
                         </div>

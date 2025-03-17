@@ -1,31 +1,49 @@
-"use client"
-
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff } from "lucide-react"
+import { login } from "@/services/authService.js";
+import { useAuthStore } from "@/store/auth.js";
+
 
 function LoginPage() {
     const [formData, setFormData] = useState({
         email: "",
         password: "",
-        rememberMe: false,
     })
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false)
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { login: loginToStore } = useAuthStore();
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target
+        const { name, value } = e.target
         setFormData((prev) => ({
             ...prev,
-            [name]: type === "checkbox" ? checked : value,
+            [name]: value,
         }))
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        console.log("Login submitted:", formData)
-        navigate("/dashboard")
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        try {
+            const {user, token} = await login(formData.email, formData.password);
+            loginToStore(user, token);
+            const rolePath = user.role;
+            navigate("/"+rolePath);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+
+    };
+
+    useEffect(() => {
+        console.log(formData);
+    }, [formData]);
 
     return (
         <div className="min-h-[calc(100vh-4rem)] w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -34,6 +52,8 @@ function LoginPage() {
                     <h1 className="text-2xl font-bold text-data-blue">Welcome back</h1>
                     <p className="text-gray-600 mt-2">Enter your credentials to access your account</p>
                 </div>
+
+                {error && <p className="text-red-500 text-center mt-4">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -77,13 +97,13 @@ function LoginPage() {
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center bg-border-dark"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (
-                                    <EyeOff className="h-5 w-5 text-bg-light" />
+                                    <EyeOff className="h-5 w-5 text-data-blue" />
                                 ) : (
-                                    <Eye className="h-5 w-5 text-bg-light" />
+                                    <Eye className="h-5 w-5 text-data-blue" />
                                 )}
                             </button>
                         </div>
@@ -93,7 +113,9 @@ function LoginPage() {
                         type="submit"
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--color-data-teal)] hover:bg-[var(--color-data-blue)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-data-teal)]"
                     >
-                        Log in
+                        {loading ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                        ) : "Se connecter"}
                     </button>
 
                     <div className="text-center">
