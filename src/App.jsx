@@ -11,6 +11,7 @@ import ProfessorDashboard from "@/pages/professor/ProfessorDashboard.jsx";
 import DashboardLayout from '@/components/layout/DashboardLayout.jsx';
 import ProtectedRoute from "@/routes/ProtectedRoute.jsx";
 import CreateExam from "@/pages/professor/CreateExam.jsx";
+import Exams from "@/pages/student/Exams.jsx";
 // import DashboardLayout from "@/components/layout/DashboardLayout.jsx";
 
 
@@ -47,6 +48,12 @@ function App() {
                     <Route path="/professor" element={<DashboardLayout />}>
                         <Route index element={<Dashboard />} />
                         <Route path="create-exam" element={<CreateExam />} />
+                        {/* Autres pages spécifiques aux professeurs */}
+                    </Route>
+
+                    <Route path="/student" element={<DashboardLayout />}>
+                        <Route index element={<Exams/>} />
+                        {/*<Route path="create-exam" element={<CreateExam />} />*/}
                         {/* Autres pages spécifiques aux professeurs */}
                     </Route>
 

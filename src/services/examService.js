@@ -130,6 +130,19 @@ const examService = {
     //         throw error;
     //     }
     // }
+
+    getAvailableExams: async () => {
+        try {
+            const response = await api.get("/submission/assigned/"); // 🔥 Nouvelle route API
+            return response.data; // Renvoie la liste des examens où l'étudiant a une soumission en attente
+        } catch (error) {
+            console.error("❌ Erreur lors de la récupération des examens disponibles :", error);
+            throw error;
+        }
+    },
+
 };
+
+
 
 export default examService;

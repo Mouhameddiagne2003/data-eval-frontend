@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FilePlus, FileText, Users, BarChart3, Settings } from 'lucide-react';
+import { LayoutDashboard, FilePlus, FileText, Users, BarChart3, Settings, History } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -18,13 +18,12 @@ const Sidebar = ({ userType }) => {
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/professor' },
                 { icon: FilePlus, label: 'Créer un examen', path: '/professor/create-exam' },
                 { icon: FileText, label: 'Examens', path: '/professor/exams' },
-                { icon: Users, label: 'Classes', path: '/professor/classes' },
                 { icon: BarChart3, label: 'Rapports', path: '/professor/reports' },
             ],
             student: [
-                { icon: LayoutDashboard, label: 'Dashboard', path: '/student' },
-                { icon: FileText, label: 'Mes examens', path: '/student/exams' },
+                { icon: FileText, label: 'Examens disponibles', path: '/student' },
                 { icon: BarChart3, label: 'Mes résultats', path: '/student/results' },
+                { icon:  History, label: 'Mon historique', path: '/student/history' },
             ],
             admin: [
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
