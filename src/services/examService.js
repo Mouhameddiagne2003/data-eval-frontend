@@ -26,15 +26,6 @@ const examService = {
             // Convertir la liste des élèves en JSON et l'envoyer comme une chaîne
             // Note: Certains backends préfèrent cette approche plutôt que plusieurs champs
             formData.append('students', JSON.stringify(examData.students));
-
-            // Alternative: Si l'API attend des champs individuels pour chaque élève
-            // examData.students.forEach((student, index) => {
-            //   formData.append(`students[${index}][email]`, student.email);
-            //   formData.append(`students[${index}][prenom]`, student.prenom);
-            //   formData.append(`students[${index}][nom]`, student.nom);
-            //   formData.append(`students[${index}][role]`, 'student');
-            //   formData.append(`students[${index}][status]`, 'active');
-            // });
         }
 
         // Ajouter le fichier s'il existe
@@ -53,84 +44,6 @@ const examService = {
         }
     },
 
-    /**
-     * Récupère tous les examens d'un professeur
-     * @returns {Promise} - La promesse de la requête API
-     */
-    // getProfessorExams: async () => {
-    //     try {
-    //         const response = await apiClient.get('/exams/professor');
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error('Erreur lors de la récupération des examens:', error);
-    //         throw error;
-    //     }
-    // },
-    //
-    // /**
-    //  * Récupère les détails d'un examen spécifique
-    //  * @param {string} examId - L'identifiant de l'examen
-    //  * @returns {Promise} - La promesse de la requête API
-    //  */
-    // getExamById: async (examId) => {
-    //     try {
-    //         const response = await apiClient.get(`/exams/${examId}`);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error(`Erreur lors de la récupération de l'examen ${examId}:`, error);
-    //         throw error;
-    //     }
-    // },
-    //
-    // /**
-    //  * Met à jour un examen existant
-    //  * @param {string} examId - L'identifiant de l'examen
-    //  * @param {Object} examData - Les données mises à jour
-    //  * @returns {Promise} - La promesse de la requête API
-    //  */
-    // updateExam: async (examId, examData) => {
-    //     const formData = new FormData();
-    //
-    //     // Ajouter les champs à mettre à jour
-    //     if (examData.title) formData.append('title', examData.title);
-    //     if (examData.content) formData.append('content', examData.content);
-    //     if (examData.gradingCriteria) formData.append('gradingCriteria', examData.gradingCriteria);
-    //     if (examData.deadline) formData.append('deadline', examData.deadline.toISOString());
-    //
-    //     // Ajouter les élèves si présents
-    //     if (examData.students) {
-    //         formData.append('students', JSON.stringify(examData.students));
-    //     }
-    //
-    //     // Ajouter le fichier s'il existe
-    //     if (examData.file) {
-    //         formData.append('file', examData.file);
-    //     }
-    //
-    //     try {
-    //         const response = await apiClient.put(`/exams/${examId}`, formData);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error(`Erreur lors de la mise à jour de l'examen ${examId}:`, error);
-    //         throw error;
-    //     }
-    // },
-    //
-    // /**
-    //  * Supprime un examen
-    //  * @param {string} examId - L'identifiant de l'examen
-    //  * @returns {Promise} - La promesse de la requête API
-    //  */
-    // deleteExam: async (examId) => {
-    //     try {
-    //         const response = await apiClient.delete(`/exams/${examId}`);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error(`Erreur lors de la suppression de l'examen ${examId}:`, error);
-    //         throw error;
-    //     }
-    // }
-
     getAvailableExams: async () => {
         try {
             const response = await api.get("/submission/assigned/"); // 🔥 Nouvelle route API
@@ -140,6 +53,59 @@ const examService = {
             throw error;
         }
     },
+
+    getExamById: async (examId) => {
+        try {
+            const response = await api.get(`/exam/${examId}`); // Route API backend
+            return response.data;
+        } catch (error) {
+            console.error(`❌ Erreur récupération examen ${examId} :`, error);
+            throw error;
+        }
+    },
+
+    downloadFile: async (fileUrl, title) => {
+        try {
+            // Extraire le nom du fichier à partir de l'URL Firebase
+            const fileName = decodeURIComponent(fileUrl)
+                .split('/')
+                .pop()
+                .split('?')[0];
+
+            // Faire la requête via l'instance API
+            const response = await api.get(`/exam/download/${fileName}`, {
+                responseType: 'blob', // Important pour récupérer le fichier comme un blob
+            });
+
+            // Créer une URL pour le blob
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+
+            // Créer un élément <a> pour le téléchargement
+            const a = document.createElement("a");
+            a.href = url;
+
+            // Utiliser le titre fourni ou le nom du fichier original
+            // Conserver l'extension originale du fichier
+            const extension = fileName.split('.').pop();
+            const fileNameDownload = title ?
+                `${title.replace(/\s+/g, "_")}.${extension}` :
+                fileName;
+
+            a.download = fileNameDownload;
+
+            // Déclencher le téléchargement
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true, message: "Téléchargement réussi !" };
+        } catch (error) {
+            console.error("❌ Erreur lors du téléchargement :", error);
+            throw error;
+        }
+    }
 
 };
 

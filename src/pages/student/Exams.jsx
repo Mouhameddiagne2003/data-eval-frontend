@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { getDownloadURL, ref } from "firebase/storage";
+import { storage } from "../../firebase.js"; // Assure-toi d'importer ta config Firebas
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast, ToastContainer } from "react-toastify";
@@ -10,25 +12,39 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import examService from "@/services/examService"; // API pour récupérer les examens
+import userService from "@/services/userService";
+import { jsPDF } from "jspdf";
+
+
+
+
 
 const Exams = () => {
     const [exams, setExams] = useState([]);
     const [selectedExam, setSelectedExam] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [user, setUser] = useState(null);
 
     // 🔥 Charger les examens disponibles depuis l'API
     useEffect(() => {
-        async function fetchExams() {
+        async function fetchExamsAndUser() {
+            setIsLoading(true);
             try {
+                const userData = await userService.getCurrentUser();
+                setUser(userData);
+
                 const fetchedExams = await examService.getAvailableExams();
                 setExams(fetchedExams);
+
             } catch (error) {
                 console.error("❌ Erreur récupération examens :", error);
                 toast.error("Impossible de charger les examens.");
+            } finally {
+                setIsLoading(false);
             }
         }
-        fetchExams();
+        fetchExamsAndUser();
     }, []);
 
     // 📤 Gestion de la soumission
@@ -62,9 +78,13 @@ const Exams = () => {
         }
     };
 
-    // 📂 Téléchargement du sujet
-    const handleDownload = (examId) => {
-        toast.success("Téléchargement du sujet réussi");
+    const handleDownload = async (fileUrl, title) => {
+        try {
+            const result = await examService.downloadFile(fileUrl, title);
+            toast.success(result.message);
+        } catch (error) {
+            toast.error("Échec du téléchargement.");
+        }
     };
 
     // 🔄 Retour à la liste des examens
@@ -127,6 +147,15 @@ const Exams = () => {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-data-blue mb-4"></div>
+                <p className="text-data-blue font-medium">Chargement des examens...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 py-6">
             <ToastContainer position="top-right" autoClose={5000} />
@@ -169,7 +198,7 @@ const Exams = () => {
 
                             <Button
                                 variant="outline"
-                                onClick={() => handleDownload(selectedExam.id)}
+                                onClick={() => handleDownload(selectedExam.fileUrl, selectedExam.title)}
 
                                 className="border-data-blue text-data-blue hover:bg-data-light-blue/10 cursor-pointer flex items-center gap-2"
                             >
@@ -215,46 +244,60 @@ const Exams = () => {
                 </div>
             ) : (
                 // 📋 Liste des examens disponibles
-                <>
+                <div className="p-6">
+                    {user && (
+                        <div className="bg-blue-50 p-4 rounded-lg mb-8">
+                            <h2 className="text-xl font-bold text-data-blue mb-2">
+                                Bienvenue cher étudiant(e) {user.prenom} {user.nom} !
+                            </h2>
+                            <p className="text-zinc-700">
+                                Voici la liste de vos examens disponibles. Cliquez sur "Commencer" pour voir les détails de l'examen et soumettre votre réponse.
+                            </p>
+                        </div>
+                    )}
                     <h1 className="text-2xl font-bold text-data-blue mb-6">Examens disponibles</h1>
-                    <div className="grid grid-cols-1 md:!grid-cols-2 lg:!grid-cols-3 gap-4">
-                        {exams.map((exam) => (
-                            <Card key={exam.id} className="border border-border-light bg-bg-light hover:shadow-md transition-shadow">
-                                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                                    <div>
-                                        <CardTitle className="text-data-blue flex items-center gap-2">
-                                            {getStatusIcon(exam.status)}
-                                            {exam.title}
-                                        </CardTitle>
-                                        <CardDescription className="text-zinc-600">
-                                            Disponible jusqu'au {exam.deadline ? formatDate(exam.deadline) : "N/A"}
-                                        </CardDescription>
-                                    </div>
-                                    {getStatusBadge(exam.status)}
-                                </CardHeader>
-                                <CardContent className="pt-2">
-                                    <p className="text-zinc-600 line-clamp-3">{exam.content}</p>
-                                </CardContent>
-                                <CardFooter className="flex justify-between gap-3 pt-2">
-                                    {/*<Button*/}
-                                    {/*    variant="outline"*/}
-                                    {/*    onClick={() => handleDownload(exam.id)}*/}
-                                    {/*    className="border-data-blue text-data-blue hover:bg-data-light-blue/10 cursor-pointer flex-1"*/}
-                                    {/*>*/}
-                                    {/*    <Download className="h-4 w-4 mr-2" />*/}
-                                    {/*    Télécharger*/}
-                                    {/*</Button>*/}
-                                    <Button
-                                        onClick={() => setSelectedExam(exam)}
-                                        className="bg-data-teal hover:!bg-data-blue text-white cursor-pointer flex-1"
-                                    >
-                                        {"Commencer"}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
-                </>
+                    {
+                        exams.length > 0 ? (
+                            <div className="grid grid-cols-1 md:!grid-cols-2 lg:!grid-cols-3 gap-4">
+                                {exams.map((exam) => (
+                                    <Card key={exam.id} className="border border-border-light bg-bg-light hover:shadow-md transition-shadow">
+                                        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                                            <div>
+                                                <CardTitle className="text-data-blue flex items-center gap-2">
+                                                    {getStatusIcon(exam.status)}
+                                                    {exam.title}
+                                                </CardTitle>
+                                                <CardDescription className="text-zinc-600">
+                                                    Disponible jusqu'au {exam.deadline ? formatDate(exam.deadline) : "N/A"}
+                                                </CardDescription>
+                                            </div>
+                                            {getStatusBadge(exam.status)}
+                                        </CardHeader>
+                                        <CardContent className="pt-2">
+                                            <p className="text-zinc-600 line-clamp-3">{exam.content}</p>
+                                        </CardContent>
+                                        <CardFooter className="flex justify-between gap-3 pt-2">
+                                            <Button
+                                                onClick={() => setSelectedExam(exam)}
+                                                className="bg-data-teal hover:!bg-data-blue text-white cursor-pointer flex-1"
+                                            >
+                                                {"Commencer"}
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </div>
+                        ): (
+                            <div className="flex flex-col items-center justify-center p-12 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="text-5xl mb-4">📚</div>
+                                <h3 className="text-xl font-medium text-data-blue mb-2">Aucun examen disponible</h3>
+                                <p className="text-zinc-600 text-center max-w-md">
+                                    Vous n'avez actuellement pas d'examens disponibles. Les nouveaux examens apparaîtront ici dès qu'ils seront assignés.
+                                </p>
+                            </div>
+                        )
+                    }
+                </div>
             )}
         </div>
     );
