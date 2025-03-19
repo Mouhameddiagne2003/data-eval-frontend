@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import socket  from "@/config/socket.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,6 +15,7 @@ const ExamResults = () => {
     const [exams, setExams] = useState([]);
     const [selectedExam, setSelectedExam] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [submissions, setSubmissions] = useState([]);
 
     // 🔥 Charger les résultats de l'étudiant depuis l'API
     useEffect(() => {
@@ -22,6 +24,11 @@ const ExamResults = () => {
             try {
                 const fetchedExams = await submissionService.getSubmittedExams();
                 setExams(fetchedExams);
+                setSubmissions(fetchedExams.map(e => ({
+                    submissionId: e.submissionId,
+                    examId: e.examId,
+                    status: e.status
+                })));
             } catch (error) {
                 console.error("❌ Erreur récupération résultats :", error);
                 toast.error("Impossible de charger les résultats.");
@@ -30,6 +37,31 @@ const ExamResults = () => {
             }
         }
         fetchSubmittedExams();
+
+        // ✅ Écoute les mises à jour des soumissions en temps réel
+        socket.on("submissionUpdated", ({ submissionId, status }) => {
+            setSubmissions(prevSubmissions => {
+                const updatedSubmissions = prevSubmissions.map(sub =>
+                    sub.submissionId === submissionId ? { ...sub, status } : sub
+                );
+
+                // ✅ Mettre à jour `exams` après modification de `submissions`
+                setExams(prevExams =>
+                    prevExams.map(exam => {
+                        const matchingSubmission = updatedSubmissions.find(sub => sub.examId === exam.id);
+                        return matchingSubmission ? { ...exam, status: matchingSubmission.status } : exam;
+                    })
+                );
+
+                return updatedSubmissions;
+            });
+        });
+
+        return () => {
+            socket.off("submissionUpdated");
+        };
+
+
     }, []);
 
     // 📥 Télécharger un fichier (soumission ou version corrigée)
@@ -58,8 +90,6 @@ const ExamResults = () => {
     const getStatusBadge = (status) => {
         switch (status) {
             case "completed":
-                return <Badge className="bg-data-light-blue text-white">Soumis</Badge>;
-            case "correction":
                 return <Badge className="bg-yellow-500 text-white">En correction</Badge>;
             case "graded":
                 return <Badge className="bg-green-500 text-white">Corrigé</Badge>;

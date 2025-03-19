@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import examService from "@/services/examService"; // API pour récupérer les examens
 import userService from "@/services/userService";
-import { jsPDF } from "jspdf";
+import socket from "@/config/socket.js";
 
 
 
@@ -21,6 +21,7 @@ import { jsPDF } from "jspdf";
 
 const Exams = () => {
     const [exams, setExams] = useState([]);
+    const [submissions, setSubmissions] = useState([]);
     const [selectedExam, setSelectedExam] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +36,20 @@ const Exams = () => {
                 setUser(userData);
 
                 const fetchedExams = await examService.getAvailableExams();
-                setExams(fetchedExams);
+                //setExams(fetchedExams);
+                setExams(fetchedExams.map(e => ({
+                    id: e.examId,
+                    title: e.title,
+                    content: e.content,
+                    deadline: e.deadline,
+                    fileUrl: e.fileUrl
+                })));
+
+                setSubmissions(fetchedExams.map(e => ({
+                    submissionId: e.submissionId,
+                    examId: e.examId,
+                    status: e.status
+                })));
 
             } catch (error) {
                 console.error("❌ Erreur récupération examens :", error);
@@ -45,6 +59,29 @@ const Exams = () => {
             }
         }
         fetchExamsAndUser();
+
+        // ✅ Écoute les mises à jour des soumissions en temps réel
+        socket.on("submissionUpdated", ({ submissionId, status }) => {
+            setSubmissions(prevSubmissions => {
+                const updatedSubmissions = prevSubmissions.map(sub =>
+                    sub.submissionId === submissionId ? { ...sub, status } : sub
+                );
+
+                // ✅ Mettre à jour `exams` après modification de `submissions`
+                setExams(prevExams =>
+                    prevExams.filter(exam => {
+                        const matchingSubmission = updatedSubmissions.find(sub => sub.examId === exam.id);
+                        return !matchingSubmission; // Garde uniquement les exams qui n'ont PAS de soumission correspondante
+                    })
+                );
+
+                return updatedSubmissions;
+            });
+        });
+
+        return () => {
+            socket.off("submissionUpdated");
+        }
     }, []);
 
     // 📤 Gestion de la soumission

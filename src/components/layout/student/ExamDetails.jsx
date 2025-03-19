@@ -8,19 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function ExamDetails({ exam, onBack }) {
     // If no exam is provided, use mock data for display
-    const examData = exam || {
-        id: "1",
-        title: "Systèmes d'Exploitation",
-        content: "Cet examen porte sur les concepts fondamentaux des systèmes d'exploitation, incluant la gestion des processus, de la mémoire, du stockage et des entrées/sorties. Vous devrez analyser et résoudre des problèmes concrets.",
-        examPeriod: "Du 15/09/2023 13:00 au 15/09/2023 16:00",
-        submissionDate: "2023-09-15T15:45:00",
-        status: "graded",
-        grade: 16,
-        feedback: "Excellent travail, particulièrement sur la partie concernant les processus.",
-        submissionUrl: "#",
-        annotatedUrl: "#",
-        examUrl: "#"
-    };
+    const examData = exam ;
 
     // 📥 Télécharger un fichier (soumission ou version corrigée)
     const handleDownload = (fileUrl, title) => {
@@ -95,7 +83,10 @@ export default function ExamDetails({ exam, onBack }) {
                                 <p><span className="font-medium">Date de soumission:</span> {formatDate(examData.submissionDate)}</p>
                                 <p>
                                     <span className="font-medium">Statut:</span>{" "}
-                                    <Badge className="bg-green-500 text-white">Corrigé</Badge>
+                                    {
+                                        examData.status === "completed" ? <Badge className="bg-yellow-500 text-white">En correction</Badge> : <Badge className="bg-green-500 text-white">Corrigé</Badge>
+                                    }
+
                                 </p>
                                 {examData.status === "graded" && (
                                     <>
