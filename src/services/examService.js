@@ -105,10 +105,40 @@ const examService = {
             console.error("❌ Erreur lors du téléchargement :", error);
             throw error;
         }
+    },
+
+    getSubmissionForStudent: async (examId, studentId) => {
+        try {
+            const response = await api.get(`/submission/student`, {
+                params: { examId, studentId }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("❌ Erreur récupération soumission :", error);
+            throw error;
+        }
+    },
+
+    // Nouvelle fonction pour mettre à jour une soumission
+    updateSubmission : async (submissionId, updateData) => {
+        try {
+            // Vérification des données requises
+            if (!submissionId) {
+                throw new Error("ID de soumission requis");
+            }
+
+            // Envoi de la requête PUT au backend
+            const response = await api.put(`/submission/${submissionId}`, updateData);
+
+            console.log("✅ Soumission mise à jour avec succès:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Erreur lors de la mise à jour de la soumission:", error);
+            throw error;
+        }
     }
 
 };
-
 
 
 export default examService;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getDownloadURL, ref } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebase.js"; // Assure-toi d'importer ta config Firebas
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,24 +50,36 @@ const Exams = () => {
     // 📤 Gestion de la soumission
     const handleSubmit = async () => {
         if (!selectedFile) {
-            toast.error("Veuillez sélectionner un fichier PDF.");
+            toast.error("Veuillez sélectionner un fichier.");
             return;
         }
 
         setIsLoading(true);
-        try {
-            const formData = new FormData();
-            formData.append("examId", selectedExam.id);
-            formData.append("file", selectedFile);
 
-            await examService.submitExam(formData); // 🔥 Envoi API
+        try {
+            // 🔍 Étape 1️⃣ : Récupérer l'ID de la soumission de l'étudiant pour cet examen
+            const submission = await examService.getSubmissionForStudent(selectedExam.id, user.id);
+            if (!submission) {
+                throw new Error("Aucune soumission trouvée pour cet examen.");
+            }
+
+            const submissionId = submission.id;
+            console.log("✅ Soumission trouvée avec ID :", submissionId);
+
+            // 📂 Étape 2️⃣ : Upload du fichier dans Firebase
+            const storageRef = ref(storage, `uploads/documents/${submissionId}${selectedFile.name}`);
+            const snapshot = await uploadBytes(storageRef, selectedFile);
+            const fileUrl = await getDownloadURL(snapshot.ref);
+
+            console.log("✅ Fichier uploadé avec succès :", fileUrl);
+
+            // 📝 Étape 3️⃣ : Mise à jour de la soumission (ajout du fichier et changement de statut)
+            await examService.updateSubmission(submissionId, {
+                fileUrl,
+                status: "submitted"
+            });
 
             toast.success("Votre réponse a été soumise avec succès !");
-            setExams((prevExams) =>
-                prevExams.map((exam) =>
-                    exam.id === selectedExam.id ? { ...exam, status: "submitted" } : exam
-                )
-            );
             setSelectedFile(null);
             setSelectedExam(null);
         } catch (error) {
@@ -77,6 +89,7 @@ const Exams = () => {
             setIsLoading(false);
         }
     };
+
 
     const handleDownload = async (fileUrl, title) => {
         try {
