@@ -13,6 +13,11 @@ import ProtectedRoute from "@/routes/ProtectedRoute.jsx";
 import CreateExam from "@/pages/professor/CreateExam.jsx";
 import Exams from "@/pages/student/Exams.jsx";
 import ExamResults from "@/pages/student/ExamResults.jsx";
+import AdminHome from "@/pages/admin/AdminHome.jsx";
+import AdminProfessor from "@/pages/admin/AdminProfessor.jsx";
+import AdminUsers from "@/pages/admin/AdminUsers.jsx";
+import AdminRoles from "@/pages/admin/AdminRoles.jsx";
+import AdminExams from "@/pages/admin/AdminExams.jsx";
 // import DashboardLayout from "@/components/layout/DashboardLayout.jsx";
 
 
@@ -46,24 +51,28 @@ function App() {
                 {/* Routes protégées */}
                 <Route element={<ProtectedRoute />}>
                     {/* Routes pour les professeurs */}
-                    <Route path="/professor" element={<DashboardLayout />}>
+                    <Route path="/professor" element={<DashboardLayout userType="professor" />}>
                         <Route index element={<Dashboard />} />
                         <Route path="create-exam" element={<CreateExam />} />
                         {/* Autres pages spécifiques aux professeurs */}
                     </Route>
 
-                    <Route path="/student" element={<DashboardLayout />}>
+                    <Route path="/student" element={<DashboardLayout userType="student" />}>
                         <Route index element={<Exams/>} />
                         <Route path="results" element={<ExamResults />} />
                         {/*<Route path="create-exam" element={<CreateExam />} />*/}
                         {/* Autres pages spécifiques aux professeurs */}
                     </Route>
 
-                    {/*/!* Routes pour les étudiants *!/*/}
-                    {/*<Route path="/student" element={<DashboardLayout />}>*/}
-                    {/*    <Route index element={<Dashboard />} />*/}
-                    {/*    /!* Autres pages spécifiques aux étudiants *!/*/}
-                    {/*</Route>*/}
+                    {/* Routes pour les étudiants */}
+                    <Route path="/admin" element={<DashboardLayout userType="admin" />}>
+                        <Route index element={<AdminHome />} />
+                        <Route path="professors" element={<AdminProfessor />} />
+                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="roles" element={<AdminRoles />} />
+                        <Route path="exams" element={<AdminExams />} />
+                        {/* Autres pages spécifiques aux étudiants */}
+                    </Route>
 
                     {/*/!* Routes pour les admins *!/*/}
                     {/*<Route path="/admin" element={<DashboardLayout />}>*/}

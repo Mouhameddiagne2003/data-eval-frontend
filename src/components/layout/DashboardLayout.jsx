@@ -4,9 +4,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import {useAuthStore } from "@/store/auth";
 
-const DashboardLayout = () => {
-    const { user } = useAuthStore();
-    const userType = user?.role;
+const DashboardLayout = ({ userType }) => {
     return (
         <div className="min-h-screen flex flex-col bg-background w-screen">
             <Header userType={userType} />

@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FilePlus, FileText, Users, BarChart3, Settings, History } from 'lucide-react';
+import {
+    LayoutDashboard,
+    FilePlus,
+    FileText,
+    Users,
+    BarChart3,
+    Settings,
+    History,
+    GraduationCap,
+    Key
+} from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -27,9 +37,12 @@ const Sidebar = ({ userType }) => {
             ],
             admin: [
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+                { icon: GraduationCap, label: 'Professeurs', path: '/admin/professors' },
                 { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
-                { icon: FileText, label: 'Examens', path: '/admin/exams' },
+                { icon: Key, label: 'Rôles & Professeurs', path: '/admin/roles' },
+                { icon: FileText, label: 'Examens & Soumissions', path: '/admin/exams' },
                 { icon: BarChart3, label: 'Rapports', path: '/admin/reports' },
+                { icon: Settings, label: 'Paramètres & Sécurité', path: '/admin/settings' }
             ]
         };
 
