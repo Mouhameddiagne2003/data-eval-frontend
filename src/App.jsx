@@ -18,6 +18,7 @@ import AdminProfessor from "@/pages/admin/AdminProfessor.jsx";
 import AdminUsers from "@/pages/admin/AdminUsers.jsx";
 import AdminRoles from "@/pages/admin/AdminRoles.jsx";
 import AdminExams from "@/pages/admin/AdminExams.jsx";
+import ProfessorExams from "@/pages/professor/ProfessorExams.jsx";
 // import DashboardLayout from "@/components/layout/DashboardLayout.jsx";
 
 
@@ -54,6 +55,7 @@ function App() {
                     <Route path="/professor" element={<DashboardLayout userType="professor" />}>
                         <Route index element={<Dashboard />} />
                         <Route path="create-exam" element={<CreateExam />} />
+                        <Route path="exams" element={<ProfessorExams/>} />
                         {/* Autres pages spécifiques aux professeurs */}
                     </Route>
 

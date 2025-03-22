@@ -11,6 +11,16 @@ const submissionService = {
             throw error;
         }
     },
+    // New function to fetch all submissions for a specific exam
+    getExamSubmissions: async (examId) => {
+        try {
+            const response = await api.get(`/submission/exam/${examId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`❌ Erreur récupération des soumissions pour l'examen ${examId} :`, error);
+            throw error;
+        }
+    }
 };
 
 export default submissionService;

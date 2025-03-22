@@ -136,7 +136,18 @@ const examService = {
             console.error("❌ Erreur lors de la mise à jour de la soumission:", error);
             throw error;
         }
-    }
+    },
+
+    // Récupérer tous les examens du professeur
+    fetchProfessorExams: async () => {
+        try {
+            const response = await api.get('/exam/');
+            return response.data;
+        } catch (error) {
+            console.error('Erreur de récupération des examens:', error);
+            throw error;
+        }
+    },
 
 };
 
