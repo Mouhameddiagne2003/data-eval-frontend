@@ -62,6 +62,58 @@ const userService = {
             console.error("Erreur lors de la récupération des examens de l'étudiant:", error);
             throw error;
         }
+    },
+
+    getPendingProfessors: async () => {
+        try {
+            const response = await api.get(`/users/professors/pending`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erreur`, error);
+            throw error;
+        }
+    },
+
+    // 📌 Récupérer tous les enseignants
+    getAllProfessors: async () => {
+        try {
+            const response = await api.get("/users/professors");
+            return response.data;
+        } catch (error) {
+            console.error("Erreur récupération des professeurs :", error);
+            throw error;
+        }
+    },
+
+    // 📌 Désactiver un professeur
+    handleRejectProf: async (professorId) => {
+        try {
+            await api.delete(`/users/professors/${professorId}`);
+            return { success: true, message: "Professeur désactivé avec succès" };
+        } catch (error) {
+            console.error("Erreur suppression professeur :", error);
+            throw error;
+        }
+    },
+
+    // 📌 Activer/Désactiver un professeur
+    handleToggleStatus: async (professorId) => {
+        try {
+            const response = await api.patch(`/users/professors/${professorId}/toggle-status`);
+            return response.data;
+        } catch (error) {
+            console.error("Erreur modification statut professeur :", error);
+            throw error;
+        }
+    },
+    approveProf: async (professorId) => {
+        try {
+            const response = await api.post(`/users/professors/${professorId}/approve`);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Erreur lors de l'approbation du professeur :", error);
+            throw error;
+        }
     }
 };
 

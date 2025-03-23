@@ -17,3 +17,16 @@ export const logout = () => {
     localStorage.removeItem("user");
     window.location.href = "/login"; // Redirection après déconnexion
 };
+
+export const registerUser = async (userData) => {
+    try {
+        const response = await api.post(`/auth/register`, userData, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Une erreur est survenue lors de l\'inscription' };
+    }
+};

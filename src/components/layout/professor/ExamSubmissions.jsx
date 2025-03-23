@@ -28,6 +28,11 @@ const ExamSubmissions = ({
             toast.error('Veuillez entrer une note valide');
         }
     };
+    const submissionNoAssignedCount = exam.submissions.filter(submission =>
+        submission.status !== 'assigned'
+    ).length;
+
+    console.log(exam.submissions)
 
     return (
         <>
@@ -43,7 +48,8 @@ const ExamSubmissions = ({
                     <CardHeader>
                         <CardTitle className="text-lg">Soumissions des étudiants</CardTitle>
                         <CardDescription>
-                            {exam.submissionsCount} soumissions sur {exam.totalStudents} étudiants
+
+                            {submissionNoAssignedCount} soumission(s) sur { exam.submissions.length} étudiants
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -70,15 +76,15 @@ const ExamSubmissions = ({
                             </TableHeader>
                             <TableBody>
                                 {exam.submissions.map((submission) => (
-                                    <TableRow key={submission.id}>
-                                        <TableCell>{submission.studentName}</TableCell>
+                                    <TableRow key={submission.id + submission.createdAt}>
+                                        <TableCell>{submission.student.prenom} {submission.student.nom}</TableCell>
                                         <TableCell>
-                                            {format(submission.submittedAt, 'dd/MM/yyyy')}
+                                            {format(submission.createdAt, 'dd/MM/yyyy')}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             {editingSubmission === submission.id ? (
                                                 <GradeEditor
-                                                    initialGrade={submission.grade.toString()}
+                                                    initialGrade={submission.grade.score.toString()}
                                                     onSave={(grade) => {
                                                         setNewGrade(grade);
                                                         handleSaveGrade(submission.id);
@@ -86,7 +92,7 @@ const ExamSubmissions = ({
                                                     onCancel={() => setEditingSubmission(null)}
                                                 />
                                             ) : (
-                                                <span>{submission.grade}/20</span>
+                                                <span>{submission.grade.score}/20</span>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -113,7 +119,7 @@ const ExamSubmissions = ({
                                                         variant="outline"
                                                         onClick={() => {
                                                             setEditingSubmission(submission.id);
-                                                            setNewGrade(submission.grade.toString());
+                                                            setNewGrade(submission.grade.score.toString());
                                                         }}
                                                     >
                                                         Modifier la note

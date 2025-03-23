@@ -1,6 +1,6 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { toast, ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 import {
     MoreHorizontal,
     Check,
@@ -17,6 +17,7 @@ import {
     GraduationCap,
     FileText,
     Users,
+    Loader2,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,97 +33,132 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-
-// Sample data for demonstration
-const pendingProfessors = [
-    {
-        id: 1,
-        name: "Dr. Sophie Martin",
-        email: "sophie.martin@example.com",
-        department: "Informatique",
-        requestDate: "2023-06-15",
-    },
-    {
-        id: 2,
-        name: "Dr. Thomas Dubois",
-        email: "thomas.dubois@example.com",
-        department: "Mathématiques",
-        requestDate: "2023-06-14",
-    },
-    {
-        id: 3,
-        name: "Dr. Marie Laurent",
-        email: "marie.laurent@example.com",
-        department: "Sciences des données",
-        requestDate: "2023-06-12",
-    },
-]
-
-const activeProfessors = [
-    {
-        id: 4,
-        name: "Dr. Jean Bernard",
-        email: "jean.bernard@example.com",
-        department: "Informatique",
-        status: "active",
-        examsCreated: 15,
-        students: 120,
-    },
-    {
-        id: 5,
-        name: "Dr. Claire Moreau",
-        email: "claire.moreau@example.com",
-        department: "Mathématiques",
-        status: "active",
-        examsCreated: 8,
-        students: 75,
-    },
-    {
-        id: 6,
-        name: "Dr. Philippe Leclerc",
-        email: "philippe.leclerc@example.com",
-        department: "Physique",
-        status: "active",
-        examsCreated: 12,
-        students: 95,
-    },
-    {
-        id: 7,
-        name: "Dr. Isabelle Dupont",
-        email: "isabelle.dupont@example.com",
-        department: "Sciences des données",
-        status: "active",
-        examsCreated: 20,
-        students: 150,
-    },
-    {
-        id: 8,
-        name: "Dr. Michel Petit",
-        email: "michel.petit@example.com",
-        department: "Informatique",
-        status: "inactive",
-        examsCreated: 5,
-        students: 40,
-    },
-]
+import userService from "@/services/userService"
 
 const AdminProfessors = () => {
     const [searchTerm, setSearchTerm] = useState("")
     const [activeTab, setActiveTab] = useState("pending")
+    const [pendingProfessors, setPendingProfessors] = useState([])
+    const [activeProfessors, setActiveProfessors] = useState([])
+    const [isLoadingPending, setIsLoadingPending] = useState(true)
+    const [isLoadingActive, setIsLoadingActive] = useState(true)
+    const [stats, setStats] = useState({
+        totalProfessors: 0,
+        activeProfessors: 0,
+        totalExams: 0,
+        totalStudents: 0,
+    })
 
+    // Fetch pending professors from API
+    useEffect(() => {
+        const fetchPendingProfessors = async () => {
+            setIsLoadingPending(true)
+            try {
+                const response = await userService.getPendingProfessors();
+                setPendingProfessors(response)
+                console.log(pendingProfessors)
+
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des professeurs en attente:", error)
+                toast.error("Impossible de charger les professeurs en attente")
+            } finally {
+                setIsLoadingPending(false)
+            }
+        }
+
+        fetchPendingProfessors()
+    }, [])
+
+    // Fetch active professors from API
+    useEffect(() => {
+        const fetchActiveProfessors = async () => {
+            setIsLoadingActive(true)
+            try {
+                const response = await userService.getAllProfessors()
+                setActiveProfessors(response)
+
+                // Calculate stats
+                const activeProfs = response.filter(prof => prof.status === "active")
+                setStats({
+                    totalProfessors: response.length,
+                    activeProfessors: activeProfs?.length,
+                    totalExams: response.reduce((sum, prof) => sum + (prof.examsCount || 0), 0),
+                    totalStudents: response.reduce((sum, prof) => sum + (prof.studentsCount || 0), 0),
+                })
+            } catch (error) {
+                console.error("Erreur lors de la récupération des professeurs:", error)
+                toast.error("Impossible de charger la liste des professeurs")
+            } finally {
+                setIsLoadingActive(false)
+            }
+        }
+
+        fetchActiveProfessors()
+    }, [])
+
+    // Handle professor approval
+    const handleApproveProf = async (professorId) => {
+        try {
+            await userService.approveProf(professorId)
+            setPendingProfessors(pendingProfessors.filter(prof => prof.id !== professorId))
+            toast.success("Professeur approuvé avec succès")
+
+            // Refresh active professors list
+            const response = await userService.getAllProfessors()
+            setActiveProfessors(response)
+        } catch (error) {
+            console.error("Erreur lors de l'approbation du professeur:", error)
+            toast.error("Impossible d'approuver le professeur")
+        }
+    }
+
+    // Handle professor rejection
+    const handleRejectProf = async (professorId) => {
+        try {
+            await userService.handleRejectProf(professorId)
+            setPendingProfessors(pendingProfessors.filter(prof => prof.id !== professorId))
+            toast.success("Demande rejetée avec succès")
+        } catch (error) {
+            console.error("Erreur lors du rejet de la demande:", error)
+            toast.error("Impossible de rejeter la demande")
+        }
+    }
+
+    // Handle professor status toggle (activate/deactivate)
+    const handleToggleStatus = async (professorId, currentStatus) => {
+        const newStatus = currentStatus === "active" ? "pending" : "active"
+        try {
+            await userService.handleToggleStatus(professorId)
+
+            // Update local state
+            setActiveProfessors(
+                activeProfessors.map(prof =>
+                    prof.id === professorId ? { ...prof, status: newStatus } : prof
+                )
+            )
+
+            toast.success(`Professeur ${newStatus === "active" ? "activé" : "désactivé"} avec succès`)
+        } catch (error) {
+            console.error("Erreur lors de la modification du statut:", error)
+            toast.error("Impossible de modifier le statut du professeur")
+        }
+    }
+
+    console.log(pendingProfessors)
     // Filter professors based on search term
-    const filteredPending = pendingProfessors.filter(
+    const filteredPending = pendingProfessors?.filter(
         (prof) =>
-            prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            prof.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            prof.department.toLowerCase().includes(searchTerm.toLowerCase()),
+            (prof.prenom && prof.prenom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (prof.nom && prof.nom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            prof.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    const filteredActive = activeProfessors.filter(
+    const filteredActive = activeProfessors?.filter(
         (prof) =>
-            prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            prof.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            prof.department.toLowerCase().includes(searchTerm.toLowerCase()),
+            (prof.nom && prof.nom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (prof.prenom && prof.prenom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            prof.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     const formatDate = (dateString) => {
@@ -134,16 +170,27 @@ const AdminProfessors = () => {
         }).format(date)
     }
 
-    const getInitials = (name) => {
-        return name
-            .split(" ")
-            .map((part) => part[0])
-            .join("")
-            .toUpperCase()
+    const getInitials = (prenom, nom) => {
+        if (!prenom && !nom) return "??";
+
+        const prenomInitial = prenom ? prenom.charAt(0) : "";
+        const nomInitial = nom ? nom.charAt(0) : "";
+
+        return (prenomInitial + nomInitial).toUpperCase();
     }
+
+    // Loading component
+    const LoadingState = () => (
+        <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-data-blue)]" />
+            <span className="ml-2 text-[var(--color-data-blue)]">Chargement en cours...</span>
+        </div>
+    );
 
     return (
         <div className="space-y-6 p-6 md:!p-8">
+            <ToastContainer position="top-right" autoClose={3000} />
+
             <div className="flex flex-col md:!flex-row md:!items-center md:!justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-[var(--color-data-blue)]">Gestion des Professeurs</h2>
@@ -163,7 +210,9 @@ const AdminProfessors = () => {
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="text-sm font-medium text-[var(--color-data-blue)]/70">Total Professeurs</p>
-                                <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mt-1">{activeProfessors.length}</h3>
+                                <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mt-1">
+                                    {isLoadingActive ? "..." : stats.totalProfessors}
+                                </h3>
                             </div>
                             <div className="h-10 w-10 rounded-full bg-[var(--color-data-teal)]/10 text-[var(--color-data-teal)] flex items-center justify-center">
                                 <GraduationCap className="h-5 w-5" />
@@ -177,7 +226,7 @@ const AdminProfessors = () => {
                             <div>
                                 <p className="text-sm font-medium text-[var(--color-data-blue)]/70">Professeurs Actifs</p>
                                 <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mt-1">
-                                    {activeProfessors.filter((p) => p.status === "active").length}
+                                    {isLoadingActive ? "..." : stats.activeProfessors}
                                 </h3>
                             </div>
                             <div className="h-10 w-10 rounded-full bg-[var(--color-data-light-blue)]/10 text-[var(--color-data-light-blue)] flex items-center justify-center">
@@ -192,7 +241,7 @@ const AdminProfessors = () => {
                             <div>
                                 <p className="text-sm font-medium text-[var(--color-data-blue)]/70">Examens Créés</p>
                                 <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mt-1">
-                                    {activeProfessors.reduce((sum, prof) => sum + prof.examsCreated, 0)}
+                                    {isLoadingActive ? "..." : stats.totalExams}
                                 </h3>
                             </div>
                             <div className="h-10 w-10 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] flex items-center justify-center">
@@ -207,7 +256,7 @@ const AdminProfessors = () => {
                             <div>
                                 <p className="text-sm font-medium text-[var(--color-data-blue)]/70">Étudiants Gérés</p>
                                 <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mt-1">
-                                    {activeProfessors.reduce((sum, prof) => sum + prof.students, 0)}
+                                    {isLoadingActive ? "..." : stats.totalStudents}
                                 </h3>
                             </div>
                             <div className="h-10 w-10 rounded-full bg-[var(--color-data-blue)]/10 text-[var(--color-data-blue)] flex items-center justify-center">
@@ -246,7 +295,7 @@ const AdminProfessors = () => {
                     >
                         <MailOpen className="h-4 w-4" /> Demandes en attente
                         <Badge variant="secondary" className="ml-1 bg-[var(--color-data-teal)]/10 text-[var(--color-data-teal)]">
-                            {pendingProfessors.length}
+                            {isLoadingPending ? "..." : pendingProfessors?.length}
                         </Badge>
                     </TabsTrigger>
                     <TabsTrigger
@@ -258,7 +307,7 @@ const AdminProfessors = () => {
                             variant="secondary"
                             className="ml-1 bg-[var(--color-data-light-blue)]/10 text-[var(--color-data-light-blue)]"
                         >
-                            {activeProfessors.length}
+                            {isLoadingActive ? "..." : activeProfessors?.length}
                         </Badge>
                     </TabsTrigger>
                 </TabsList>
@@ -274,7 +323,9 @@ const AdminProfessors = () => {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {filteredPending.length === 0 ? (
+                            {isLoadingPending ? (
+                                <LoadingState />
+                            ) : filteredPending?.length === 0 ? (
                                 <div className="text-center py-10">
                                     <div className="mx-auto h-12 w-12 rounded-full bg-[var(--color-muted-light)] flex items-center justify-center mb-4">
                                         <User className="h-6 w-6 text-[var(--color-data-blue)]/50" />
@@ -290,16 +341,13 @@ const AdminProfessors = () => {
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)]">Nom</th>
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)]">Email</th>
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)] hidden md:!table-cell">
-                                                Département
-                                            </th>
-                                            <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)] hidden md:!table-cell">
                                                 Date de demande
                                             </th>
                                             <th className="py-3 px-4 text-right font-medium text-[var(--color-data-blue)]">Actions</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {filteredPending.map((professor) => (
+                                        {filteredPending?.map((professor) => (
                                             <tr
                                                 key={professor.id}
                                                 className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-muted-light)]/30"
@@ -307,17 +355,16 @@ const AdminProfessors = () => {
                                                 <td className="py-3 px-4">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-8 w-8 bg-[var(--color-data-teal)]/10 text-[var(--color-data-teal)]">
-                                                            <AvatarFallback>{getInitials(professor.name)}</AvatarFallback>
+                                                            <AvatarFallback>{getInitials(professor.prenom, professor.nom)}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="font-medium text-[var(--color-data-blue)]">{professor.name}</span>
+                                                        <span className="font-medium text-[var(--color-data-blue)]">
+                                                            {professor.prenom} {professor.nom}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 text-[var(--color-data-blue)]/70">{professor.email}</td>
                                                 <td className="py-3 px-4 hidden md:!table-cell text-[var(--color-data-blue)]/70">
-                                                    {professor.department}
-                                                </td>
-                                                <td className="py-3 px-4 hidden md:!table-cell text-[var(--color-data-blue)]/70">
-                                                    {formatDate(professor.requestDate)}
+                                                    {formatDate(professor.createdAt)}
                                                 </td>
                                                 <td className="py-3 px-4 text-right">
                                                     <div className="flex justify-end gap-2">
@@ -325,6 +372,7 @@ const AdminProfessors = () => {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                                                            onClick={() => handleApproveProf(professor.id)}
                                                         >
                                                             <Check className="h-4 w-4" /> Accepter
                                                         </Button>
@@ -332,6 +380,7 @@ const AdminProfessors = () => {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 gap-1 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                                                            onClick={() => handleRejectProf(professor.id)}
                                                         >
                                                             <X className="h-4 w-4" /> Refuser
                                                         </Button>
@@ -356,7 +405,9 @@ const AdminProfessors = () => {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {filteredActive.length === 0 ? (
+                            {isLoadingActive ? (
+                                <LoadingState />
+                            ) : filteredActive?.length === 0 ? (
                                 <div className="text-center py-10">
                                     <div className="mx-auto h-12 w-12 rounded-full bg-[var(--color-muted-light)] flex items-center justify-center mb-4">
                                         <User className="h-6 w-6 text-[var(--color-data-blue)]/50" />
@@ -372,9 +423,6 @@ const AdminProfessors = () => {
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)]">Nom</th>
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)]">Email</th>
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)] hidden md:!table-cell">
-                                                Département
-                                            </th>
-                                            <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)] hidden md:!table-cell">
                                                 Examens créés
                                             </th>
                                             <th className="py-3 px-4 text-left font-medium text-[var(--color-data-blue)] hidden md:!table-cell">
@@ -385,7 +433,7 @@ const AdminProfessors = () => {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {filteredActive.map((professor) => (
+                                        {filteredActive?.map((professor) => (
                                             <tr
                                                 key={professor.id}
                                                 className="border-t border-[var(--color-border-light)] hover:bg-[var(--color-muted-light)]/30"
@@ -393,20 +441,19 @@ const AdminProfessors = () => {
                                                 <td className="py-3 px-4">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-8 w-8 bg-[var(--color-data-teal)]/10 text-[var(--color-data-teal)]">
-                                                            <AvatarFallback>{getInitials(professor.name)}</AvatarFallback>
+                                                            <AvatarFallback>{getInitials(professor.prenom, professor.nom)}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="font-medium text-[var(--color-data-blue)]">{professor.name}</span>
+                                                        <span className="font-medium text-[var(--color-data-blue)]">
+                                                            {professor.prenom} {professor.nom}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 text-[var(--color-data-blue)]/70">{professor.email}</td>
                                                 <td className="py-3 px-4 hidden md:!table-cell text-[var(--color-data-blue)]/70">
-                                                    {professor.department}
+                                                    {professor.examsCount || 0}
                                                 </td>
                                                 <td className="py-3 px-4 hidden md:!table-cell text-[var(--color-data-blue)]/70">
-                                                    {professor.examsCreated}
-                                                </td>
-                                                <td className="py-3 px-4 hidden md:!table-cell text-[var(--color-data-blue)]/70">
-                                                    {professor.students}
+                                                    {professor.studentsCount || 0}
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <Badge
@@ -441,11 +488,17 @@ const AdminProfessors = () => {
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
                                                             {professor.status === "active" ? (
-                                                                <DropdownMenuItem className="flex items-center text-red-600">
+                                                                <DropdownMenuItem
+                                                                    className="flex items-center text-red-600"
+                                                                    onClick={() => handleToggleStatus(professor.id, professor.status)}
+                                                                >
                                                                     <Ban className="mr-2 h-4 w-4" /> Désactiver
                                                                 </DropdownMenuItem>
                                                             ) : (
-                                                                <DropdownMenuItem className="flex items-center text-green-600">
+                                                                <DropdownMenuItem
+                                                                    className="flex items-center text-green-600"
+                                                                    onClick={() => handleToggleStatus(professor.id, professor.status)}
+                                                                >
                                                                     <Check className="mr-2 h-4 w-4" /> Activer
                                                                 </DropdownMenuItem>
                                                             )}
@@ -461,9 +514,9 @@ const AdminProfessors = () => {
                         </CardContent>
                         <CardFooter className="flex justify-between border-t border-[var(--color-border-light)] py-4">
                             <div className="text-sm text-[var(--color-data-blue)]/70">
-                                Affichage de <span className="font-medium text-[var(--color-data-blue)]">{filteredActive.length}</span>{" "}
+                                Affichage de <span className="font-medium text-[var(--color-data-blue)]">{filteredActive?.length}</span>{" "}
                                 professeurs sur{" "}
-                                <span className="font-medium text-[var(--color-data-blue)]">{activeProfessors.length}</span>
+                                <span className="font-medium text-[var(--color-data-blue)]">{activeProfessors?.length}</span>
                             </div>
                             <div className="flex gap-2">
                                 <Button
@@ -492,4 +545,3 @@ const AdminProfessors = () => {
 }
 
 export default AdminProfessors
-

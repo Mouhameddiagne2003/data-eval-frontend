@@ -142,6 +142,7 @@ const ExamTable = ({ exams, isLoading, onDeleteExam, onSelectExam, onResetFilter
 
     // Fonction pour sélectionner un examen avec ses soumissions
     const handleSelectExam = (exam) => {
+        console.log(exam)
         // Si on a déjà chargé les soumissions, on les inclut dans l'objet exam
         if (examSubmissions[exam.id]) {
             const examWithSubmissions = {
@@ -149,6 +150,7 @@ const ExamTable = ({ exams, isLoading, onDeleteExam, onSelectExam, onResetFilter
                 submissions: examSubmissions[exam.id]
             }
             onSelectExam(examWithSubmissions)
+            console.log(examWithSubmissions)
         } else {
             // Sinon on charge les soumissions puis on sélectionne l'examen
             setLoadingSubmissions(prev => ({ ...prev, [exam.id]: true }))
