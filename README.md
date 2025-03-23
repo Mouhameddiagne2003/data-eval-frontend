@@ -1,25 +1,12 @@
-# Data Eval - Front-end
+# React + Vite
 
-Plateforme d'évaluation automatisée des exercices de bases de données.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Technologies Utilisées
+Currently, two official plugins are available:
 
-- **Framework** : Next.js
-- **Langage** : JavaScript
-- **Styling** : Tailwind CSS 
-- **Gestion d'état** : Redux 
-- **HTTP Client** : Fetch API
-- **Tests** : Jest, React Testing Library
-- **Linting** : ESLint, Prettier
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Installation
+## Expanding the ESLint configuration
 
-1. Clonez le dépôt :
-   git clone https://github.com/Mouhameddiagne2003/data-eval-frontend.git
-   cd data-eval-frontend
-
-2. Installer les dépendances
-   npm install
-   
-3. Démarrer le serveur:
-   npm run dev
+If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

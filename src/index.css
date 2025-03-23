@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  --color-data-teal: #0A6E8A;
+  --color-data-light-blue: #4AB7CD;
+  --color-data-blue: #054257;
+  --color-bg-light: #FFFFFF;
+  --color-fg-light: #054257;
+  --color-bg-dark: #032E3F;
+  --color-fg-dark: #F2F2F2;
+  --color-border-light: #D1E3EA;
+  --color-border-dark: #13303F;
+  --color-accent: #4AB7CD;
+  --color-muted-light: #F5F8FA;
+  --color-muted-dark: #13303F;
+  --color-destructive: #D93939;
+}
+
+@layer base {
+  :root {
+    --color-data-teal: #0a6e8a;
+    --color-data-light-blue: #4ab7cd;
+    --color-data-blue: #054257;
+    --color-bg-light: #ffffff;
+    --color-fg-light: #054257;
+    --color-bg-dark: #032e3f;
+    --color-fg-dark: #f2f2f2;
+    --color-border-light: #d1e3ea;
+    --color-border-dark: #13303f;
+    --color-accent: #4ab7cd;
+    --color-muted-light: #f5f8fa;
+    --color-muted-dark: #13303f;
+    --color-destructive: #d93939;
+
+    --background: var(--color-bg-light);
+    --foreground: var(--color-fg-light);
+
+
+    --card: var(--color-bg-light);
+    --card-foreground: var(--color-fg-light);
+
+    --popover: var(--color-bg-light);
+    --popover-foreground: var(--color-fg-light);
+
+    --primary: var(--color-data-teal);
+    --primary-foreground: var(--color-bg-light);
+
+    --secondary: var(--color-data-light-blue);
+    --secondary-foreground: var(--color-fg-light);
+
+    --muted: var(--color-muted-light);
+    --muted-foreground: var(--color-data-blue);
+
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-fg-light);
+
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-bg-light);
+
+    --border: var(--color-border-light);
+    --input: var(--color-border-light);
+    --ring: var(--color-data-blue);
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: var(--color-bg-dark);
+    --foreground: var(--color-fg-dark);
+
+    --card: var(--color-bg-dark);
+    --card-foreground: var(--color-fg-dark);
+
+    --popover: var(--color-bg-dark);
+    --popover-foreground: var(--color-fg-dark);
+
+    --primary: var(--color-data-teal);
+    --primary-foreground: var(--color-fg-dark);
+
+    --secondary: var(--color-data-light-blue);
+    --secondary-foreground: var(--color-fg-dark);
+
+    --muted: var(--color-muted-dark);
+    --muted-foreground: var(--color-data-light-blue);
+
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-fg-dark);
+
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-fg-dark);
+
+    --border: var(--color-border-dark);
+    --input: var(--color-border-dark);
+    --ring: var(--color-data-light-blue);
+  }
+}
+
+@layer base {
+  /** {*/
+  /*  @apply border-border;*/
+  /*}*/
+  /*body {*/
+  /*  @apply bg-background text-foreground;*/
+  /*}*/
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s infinite ease-in-out;
+}
+
