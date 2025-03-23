@@ -48,6 +48,7 @@ const ExamDetails = ({ exam, open, onOpenChange }) => {
 
     // Détermine si l'écran est petit (mobile)
     const isMobile = width < 640;
+    console.log(exam)
 
     return (
         <>
@@ -156,8 +157,8 @@ const ExamDetails = ({ exam, open, onOpenChange }) => {
                         </DialogHeader>
                         <div className="w-full h-[70vh] overflow-hidden">
                             <PDFViewer
-                                title={`Correction modèle : ${exam.name}`}
-                                pdfUrl={exam.fileUrl}
+                                title={`Correction modèle : ${exam.title}`}
+                                fileUrl={exam.correction.content}
                                 allowDownload={true}
                                 className="w-full h-full"
                             />
@@ -184,14 +185,14 @@ const ExamDetails = ({ exam, open, onOpenChange }) => {
                     <DialogContent className="w-[95vw] max-w-4xl p-0 bg-white max-h-[90vh] overflow-hidden">
                         <DialogHeader className="p-4 border-b">
                             <DialogTitle className="text-sm sm:text-base break-words">
-                                Copie de {exam.submissions.find(s => s.id === viewingSubmission)?.studentName} -
-                                Note: {exam.submissions.find(s => s.id === viewingSubmission)?.grade}/20
+                                Copie de {exam.submissions.find(s => s.id === viewingSubmission)?.student.prenom} -
+                                Note: {exam.submissions.find(s => s.id === viewingSubmission)?.grade.score}/20
                             </DialogTitle>
                         </DialogHeader>
                         <div className="w-full h-[65vh] overflow-hidden">
                             <PDFViewer
-                                title={`Copie de ${exam.submissions.find(s => s.id === viewingSubmission)?.studentName}`}
-                                pdfUrl={exam.submissions.find(s => s.id === viewingSubmission)?.content}
+                                title={`Copie de ${exam.submissions.find(s => s.id === viewingSubmission)?.student.prenom}`}
+                                fileUrl={exam.submissions.find(s => s.id === viewingSubmission)?.content}
                                 allowDownload={true}
                                 className="w-full h-full"
                             />

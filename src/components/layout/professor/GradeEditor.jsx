@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, XCircle, Save, Pencil } from 'lucide-react';
+import { CheckCircle, XCircle, Save, Pencil, X } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +11,12 @@ const GradeEditor = ({
                          submission,
                          maxGrade = 20,
                          onSave,
+                         onCancel,
                          submissionCriteria = []
                      }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentGrade, setCurrentGrade] = useState(submission?.grade || 0);
-    const [feedback, setFeedback] = useState(submission?.feedback || '');
+    const [isEditing, setIsEditing] = useState(true); // Start in editing mode by default
+    const [currentGrade, setCurrentGrade] = useState(submission?.grade?.score || 0);
+    const [feedback, setFeedback] = useState(submission?.grade?.feedback || '');
 
     // If criteria are provided, initialize them with values from submission or zeros
     const [criteriaScores, setCriteriaScores] = useState(
@@ -51,8 +52,10 @@ const GradeEditor = ({
 
         const updatedSubmission = {
             ...submission,
-            grade: parseFloat(currentGrade),
-            feedback,
+            grade: {
+                score: parseFloat(currentGrade),
+                feedback
+            },
             criteriaScores: criteriaScores.reduce((obj, criteria) => {
                 obj[criteria.id] = criteria.score;
                 return obj;
@@ -62,6 +65,17 @@ const GradeEditor = ({
         onSave(updatedSubmission);
         setIsEditing(false);
         toast.success('Note enregistrée avec succès');
+    };
+
+    const handleCancel = () => {
+        if (onCancel) {
+            onCancel();
+        } else {
+            setIsEditing(false);
+            // Reset to original values
+            setCurrentGrade(submission?.grade?.score || 0);
+            setFeedback(submission?.grade?.feedback || '');
+        }
     };
 
     const getGradeColor = (grade) => {
@@ -112,13 +126,6 @@ const GradeEditor = ({
 
                     {isEditing && (
                         <div className="flex items-center gap-4">
-                            <Slider
-                                value={[currentGrade]}
-                                max={maxGrade}
-                                step={0.5}
-                                onValueChange={(value) => handleGradeChange(value[0])}
-                                className="flex-grow"
-                            />
                             <Input
                                 type="number"
                                 value={currentGrade}
@@ -189,12 +196,9 @@ const GradeEditor = ({
                 <CardFooter className="flex justify-end space-x-2 pt-0">
                     <Button
                         variant="outline"
-                        onClick={() => {
-                            setCurrentGrade(submission?.grade || 0);
-                            setFeedback(submission?.feedback || '');
-                            setIsEditing(false);
-                        }}
+                        onClick={handleCancel}
                     >
+                        <X className="h-4 w-4 mr-2" />
                         Annuler
                     </Button>
                     <Button onClick={handleSave}>

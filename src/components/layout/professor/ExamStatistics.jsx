@@ -37,7 +37,7 @@ const ExamStatistics = ({
         const submissionRate = totalSubmissions / (exam.totalStudents || 1) * 100;
 
         // Calculate grades stats
-        const grades = submissions.map(s => s.grade || 0);
+        const grades = submissions.map(s => s.grade.score || 0);
         const averageGrade = grades.length ? grades.reduce((sum, g) => sum + g, 0) / grades.length : 0;
         const minGrade = grades.length ? Math.min(...grades) : 0;
         const maxGrade = grades.length ? Math.max(...grades) : 0;

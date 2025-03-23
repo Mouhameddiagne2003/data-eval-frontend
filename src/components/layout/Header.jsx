@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, Bell, PlusCircle, FileText, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import logo from '@/assets/data_eval_logo.webp'
 
 const Header = ({ userType}) => {
     // Action button configuration based on user type
@@ -61,7 +62,7 @@ const Header = ({ userType}) => {
                         <div className="relative w-8 h-8 overflow-hidden">
                             <div className="absolute inset-0 bg-gradient rounded-full animate-pulse-slow"></div>
                             <img
-                                src="/lovable-uploads/c14e1ccd-71e8-48d5-835f-530dd532e76f.png"
+                                src={logo}
                                 alt="DATA-EVAL Logo"
                                 className="relative z-10 w-full h-full object-contain p-0.5"
                             />

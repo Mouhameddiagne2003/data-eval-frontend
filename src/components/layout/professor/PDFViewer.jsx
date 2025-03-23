@@ -5,22 +5,42 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-// Configuration du worker PDF.js avec un CDN
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Set the worker source to a known good version on CDN
+// Note: Using version 3.4.120 which is known to be available on cdnjs
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js`;
 
 const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
-    console.log(fileUrl)
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [scale, setScale] = useState(1);
     const [rotation, setRotation] = useState(0);
     const [error, setError] = useState(null);
-    const [fileType, setFileType] = useState(null); // 'pdf', 'text', ou null
+    const [fileType, setFileType] = useState(null); // 'pdf', 'text', 'rawtext' ou null
     const [textContent, setTextContent] = useState(''); // Contenu du fichier texte
+
+    // Fonction pour nettoyer les balises <think> de DeepSeek
+    const cleanThinkTags = (text) => {
+        // Enlève les balises <think> et </think> et tout leur contenu
+        return text.replace(/<think>[\s\S]*?<\/think>/g, '');
+    };
+
+    // Vérifier si la chaîne est une URL valide
+    const isValidUrl = (string) => {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    };
 
     // Déterminer le type de fichier à partir de l'extension de l'URL
     const getFileTypeFromUrl = (url) => {
+        if (!isValidUrl(url)) {
+            return 'rawtext'; // S'il ne s'agit pas d'une URL, c'est du texte brut
+        }
+
         // Décoder les caractères encodés dans l'URL
         const decodedUrl = decodeURIComponent(url);
 
@@ -36,52 +56,69 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
     };
 
     useEffect(() => {
-        const type = getFileTypeFromUrl(fileUrl);
-        console.log('Type de fichier détecté :', type); // Ajoutez ce log
-        if (!type) {
-            setError('Type de fichier non supporté.');
-            setIsLoading(false);
-            return;
-        }
-        setFileType(type);
-        // ...
-    }, [fileUrl]);
+        // Reset errors when fileUrl changes
+        setError(null);
 
-    // Charger le fichier en fonction de son type
-    useEffect(() => {
+        // Log for debugging
+        console.log("Processing file URL:", fileUrl);
+
         const type = getFileTypeFromUrl(fileUrl);
-        if (!type) {
-            setError('Type de fichier non supporté.');
-            setIsLoading(false);
-            return;
-        }
+        console.log('Type de fichier détecté :', type);
 
         setFileType(type);
 
-        if (type === 'text') {
+        if (type === 'rawtext') {
+            // Si c'est du texte brut, pas besoin de fetch
+            // Nettoyer les balises <think> de DeepSeek
+            const cleanedText = cleanThinkTags(fileUrl);
+            setTextContent(cleanedText);
+            setIsLoading(false);
+        } else if (type === 'text') {
             // Récupérer le contenu du fichier texte
             fetch(fileUrl)
-                .then((response) => response.text())
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
                 .then((text) => {
                     setTextContent(text);
                     setIsLoading(false);
                 })
                 .catch((err) => {
-                    setError('Impossible de charger le fichier texte.');
+                    console.error("Text file fetch error:", err);
+                    setError(`Impossible de charger le fichier texte: ${err.message}`);
                     setIsLoading(false);
                 });
-        } else {
+        } else if (type === 'pdf') {
             // Pour les PDF, react-pdf gère le chargement
+            setIsLoading(true);
+            // PDF loading will be handled by react-pdf Document component
+        } else if (!type) {
+            setError('Type de fichier non supporté.');
             setIsLoading(false);
         }
     }, [fileUrl]);
 
     const handleDownload = () => {
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = `${title.replace(/\s+/g, '_')}.${fileType === 'pdf' ? 'pdf' : 'txt'}`;
-        link.target = '_blank';
-        link.click();
+        if (fileType === 'rawtext') {
+            // Pour le texte brut, créer un blob et le télécharger
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${title.replace(/\s+/g, '_')}.txt`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } else {
+            // Pour les URL de fichiers
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = `${title.replace(/\s+/g, '_')}.${fileType === 'pdf' ? 'pdf' : 'txt'}`;
+            link.target = '_blank';
+            link.click();
+        }
     };
 
     const handleZoomIn = () => {
@@ -111,7 +148,7 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
 
     const onDocumentLoadError = (error) => {
         console.error('Erreur lors du chargement du PDF :', error);
-        setError('Impossible de charger le PDF. Vérifiez l\'URL.');
+        setError(`Impossible de charger le PDF: ${error.message || 'Erreur inconnue'}`);
         setIsLoading(false);
     };
 
@@ -123,7 +160,7 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
                     <span className="font-medium">{title || 'Document'}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                    {fileType === 'pdf' && (
+                    {fileType === 'pdf' && !error && (
                         <>
                             <Button
                                 variant="ghost"
@@ -152,7 +189,7 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
                             </Button>
                         </>
                     )}
-                    {allowDownload && (
+                    {allowDownload && !error && (
                         <Button
                             variant="ghost"
                             size="sm"
@@ -188,6 +225,15 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
                                 file={fileUrl}
                                 onLoadSuccess={onDocumentLoadSuccess}
                                 onLoadError={onDocumentLoadError}
+                                loading={
+                                    <div className="w-full max-w-[595px] aspect-[1/1.414] bg-white rounded shadow-sm overflow-hidden">
+                                        <Skeleton className="w-full h-full" />
+                                    </div>
+                                }
+                                options={{
+                                    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/',
+                                    cMapPacked: true,
+                                }}
                             >
                                 <Page
                                     pageNumber={pageNumber}
@@ -222,7 +268,7 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
                                 </div>
                             )}
                         </>
-                    ) : fileType === 'text' ? (
+                    ) : (fileType === 'text' || fileType === 'rawtext') ? (
                         <pre className="w-full max-w-[595px] bg-white rounded shadow-sm p-4 overflow-auto">
                             {textContent}
                         </pre>
@@ -233,7 +279,7 @@ const PDFViewer = ({ fileUrl, title, allowDownload = true }) => {
                                 Type de fichier non supporté.
                                 <br />
                                 <span className="text-sm">
-                                    Seuls les fichiers PDF et texte (.txt) sont supportés.
+                                    Seuls les fichiers PDF, texte (.txt) et le texte brut sont supportés.
                                 </span>
                             </p>
                         </div>

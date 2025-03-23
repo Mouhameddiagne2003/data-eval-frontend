@@ -60,6 +60,8 @@ const ProfessorExamsPage = () => {
             setIsLoading(false);
         }
     };
+    console.log("tetstt")
+    console.log(exams)
 
     // Chargement initial des examens
     useEffect(() => {

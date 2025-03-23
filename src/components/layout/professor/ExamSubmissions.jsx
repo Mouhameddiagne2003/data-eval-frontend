@@ -32,7 +32,7 @@ const ExamSubmissions = ({
         submission.status !== 'assigned'
     ).length;
 
-    console.log(exam.submissions)
+    console.log(exam)
 
     return (
         <>
@@ -84,7 +84,7 @@ const ExamSubmissions = ({
                                         <TableCell className="text-center">
                                             {editingSubmission === submission.id ? (
                                                 <GradeEditor
-                                                    initialGrade={submission.grade.score.toString()}
+                                                    submission={submission}
                                                     onSave={(grade) => {
                                                         setNewGrade(grade);
                                                         handleSaveGrade(submission.id);

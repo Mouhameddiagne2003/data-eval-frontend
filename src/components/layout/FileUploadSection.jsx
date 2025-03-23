@@ -5,15 +5,30 @@ import { Input } from "@/components/ui/input";
 import { FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Loader2 } from "lucide-react"; // 🔥 Spinner ShadCN
 
-function FileUploadSection({ onFileUpload }) {
+function FileUploadSection({ onFileUpload, forFormat }) {
     const [uploading, setUploading] = useState(false);
     const [fileUrl, setFileUrl] = useState("");
+
+    // Fonction pour détecter le format du fichier
+    const detectFileFormat = (file) => {
+        if (!file) return "application/pdf"; // Par défaut
+
+        const fileName = file.name.toLowerCase();
+        if (fileName.endsWith('.pdf')) return "application/pdf";
+        if (fileName.endsWith('.txt')) return "text/plain";
+        if (fileName.endsWith('.md')) return "markdown";
+        if (fileName.endsWith('.tex')) return "latex";
+        if (fileName.endsWith('.docx')) return "docx";
+
+        return "application/pdf"; // Par défaut si non détecté
+    };
 
     const handleFileChange = async (event) => {
         const file = event.target.files?.[0] || null;
         if (!file) return;
 
         setUploading(true); // 🔥 Active le spinner
+        const format = detectFileFormat(file);
         const storageRef = ref(storage, `uploads/documents/${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -30,6 +45,7 @@ function FileUploadSection({ onFileUpload }) {
                 const url = await getDownloadURL(uploadTask.snapshot.ref);
                 setFileUrl(url);
                 onFileUpload(url); // 🔥 Envoie l’URL au parent (CreateExam)
+                forFormat(format)
                 setUploading(false);
             }
         );

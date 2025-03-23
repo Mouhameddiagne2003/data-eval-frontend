@@ -16,6 +16,7 @@ const examService = {
         formData.append('title', examData.title);
         formData.append('content', examData.content);
         formData.append('gradingCriteria', examData.gradingCriteria);
+        formData.append("format", examData.format);
         // formData.append('format', examData.format);
         console.log("HELLO");
         formData.append('deadline', examData.deadline);
