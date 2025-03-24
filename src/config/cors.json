@@ -1,6 +1,6 @@
 [
   {
-    "origin": ["http://localhost:5173"],
+    "origin": ["https://data-eval-frontend.onrender.com/"],
     "method": ["GET"],
     "maxAgeSeconds": 3600
   }
