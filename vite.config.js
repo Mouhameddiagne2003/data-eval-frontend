@@ -5,6 +5,7 @@ import path from 'path'; // Importez le module path
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

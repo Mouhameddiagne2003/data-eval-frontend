@@ -1,12 +1,12 @@
 {
   "name": "data-eval-frontend",
+  "homepage": ".",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "echo '/* /index.html 200' > dist/_redirects",
     "lint": "eslint .",
     "preview": "vite preview"
   },
