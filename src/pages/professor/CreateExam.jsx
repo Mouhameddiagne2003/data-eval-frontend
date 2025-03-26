@@ -1,302 +1,3 @@
-// import React, { useState } from "react";
-// import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { FilePlus, Save, User } from "lucide-react";
-// import { useNavigate } from "react-router-dom";
-// import {toast, ToastContainer} from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-// import { Button } from "@/components/ui/button";
-// import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-// import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Input } from "@/components/ui/input";
-// import { useIsMobile } from "@/hooks/use-mobile";
-// import StudentsList from "@/components/layout/StudentsList"
-// import AddStudentForm from "@/components/layout/AddStudentForm.jsx"
-// import FileUploadSection from "@/components/layout/FileUploadSection.jsx"
-// import DeadlineField from "@/components/layout/DeadlineField.jsx"
-//
-//
-// import { examFormSchema } from "@/utils/validation";
-// import examService from "@/services/examService.js";
-//
-// function CreateExam() {
-//     const navigate = useNavigate();
-//     const isMobile = useIsMobile();
-//     const [isSubmitting, setIsSubmitting] = useState(false);
-//     const [selectedFile, setSelectedFile] = useState(null);
-//     const [csvFile, setCsvFile] = useState(null);
-//
-//     // Initialize form with default values
-//     const form = useForm({
-//         resolver: zodResolver(examFormSchema),
-//         defaultValues: {
-//             title: "",
-//             content: "",
-//             gradingCriteria: "",
-//             deadline: new Date(), // Default: 1 week from now
-//             students: [],
-//         },
-//     });
-//
-//     const onSubmit = async (data) => {
-//         setIsSubmitting(true);
-//
-//         try {
-//             const payload = {
-//                 title: data.title,
-//                 content: data.content,
-//                 gradingCriteria: data.gradingCriteria,
-//                 deadline: new Date(data.deadline).toISOString(),
-//                 students: data.students,
-//                 //format: selectedFile ? selectedFile.type : null, // Ajouter le format du fichier
-//
-//             };
-//
-//             if (selectedFile) {
-//                 payload.file = selectedFile; // Si vous devez envoyer un fichier, utilisez FormData
-//             }
-//
-//             console.log("🚀 Envoi de la requête API...");
-//             const result = await examService.createExam(payload);
-//             console.log("✅ Réponse reçue :", result);
-//
-//             toast.success(`L'examen "${data.title}" a été créé avec succès avec ${data.students.length} élèves.`);
-//             navigate('/professor');
-//         } catch (error) {
-//             console.error('Error creating exam:', error);
-//             toast.error("Échec de la création de l'examen. Veuillez réessayer.");
-//         } finally {
-//             setIsSubmitting(false);
-//         }
-//     };
-//
-//     // Add a student manually
-//     const addStudent = (student) => {
-//         const currentStudents = form.getValues().students || [];
-//
-//         // Check if email already exists
-//         if (currentStudents.some(s => s.email === student.email)) {
-//             toast.error("Un élève avec cette adresse email existe déjà dans la liste.");
-//             return;
-//         }
-//
-//         form.setValue('students', [...currentStudents, { ...student }]);
-//     };
-//
-//     // Remove a student
-//     const removeStudent = (index) => {
-//         const currentStudents = form.getValues().students || [];
-//         const updatedStudents = [...currentStudents];
-//         updatedStudents.splice(index, 1);
-//         form.setValue('students', updatedStudents);
-//     };
-//
-//     // Parse CSV file and add students
-//     const parseCSV = async (file) => {
-//         const reader = new FileReader();
-//         reader.onload = (e) => {
-//             const content = e.target?.result;
-//             const lines = content.split('\n');
-//
-//             // Skip header if exists
-//             const startIndex = lines[0].toLowerCase().includes('email') ? 1 : 0;
-//
-//             const newStudents = [];
-//
-//             for (let i = startIndex; i < lines.length; i++) {
-//                 const line = lines[i].trim();
-//                 if (!line) continue;
-//
-//                 const fields = line.split(',');
-//
-//                 if (fields.length >= 3) {
-//                     const email = fields[0].trim();
-//                     const prenom = fields[1].trim();
-//                     const nom = fields[2].trim();
-//
-//                     if (email && prenom && nom) {
-//                         newStudents.push({ email, prenom, nom });
-//                     }
-//                 }
-//             }
-//
-//             if (newStudents.length === 0) {
-//                 toast.error("Aucun élève valide trouvé dans le fichier CSV. Le format doit être: email,prenom,nom");
-//                 return;
-//             }
-//
-//             // Add new students to form
-//             const currentStudents = form.getValues().students || [];
-//             form.setValue('students', [...currentStudents, ...newStudents]);
-//
-//             toast.success(`${newStudents.length} élèves ont été importés avec succès.`);
-//         };
-//
-//         reader.readAsText(file);
-//     };
-//
-//     return (
-//         <div className="max-w-4xl mx-auto">
-//             <ToastContainer position="top-right" autoClose={5000} />
-//             <Card className="bg-card border-border-light dark:border-border-dark">
-//                 <CardHeader className="space-y-1">
-//                     <CardTitle className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-data-teal">
-//                         <FilePlus className="h-6 w-6" /> Créer un Nouvel Examen
-//                     </CardTitle>
-//                 </CardHeader>
-//                 <CardContent>
-//                     <Form {...form}>
-//                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-//                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//                                 {/* Title field */}
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="title"
-//                                     render={({ field }) => (
-//                                         <FormItem className="col-span-1 md:col-span-2">
-//                                             <FormLabel>Titre de l'examen</FormLabel>
-//                                             <FormControl>
-//                                                 <Input placeholder="Entrez le titre de l'examen" {...field} />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//
-//                                 {/* Content/Description field */}
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="content"
-//                                     render={({ field }) => (
-//                                         <FormItem className="col-span-1 md:col-span-2">
-//                                             <FormLabel>Description</FormLabel>
-//                                             <FormControl>
-//                                                 <Textarea
-//                                                     placeholder="Entrez une description détaillée de l'examen"
-//                                                     className="min-h-32"
-//                                                     {...field}
-//                                                 />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//
-//                                 {/* Grading Criteria field */}
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="gradingCriteria"
-//                                     render={({ field }) => (
-//                                         <FormItem className="col-span-1 md:col-span-2">
-//                                             <FormLabel>Critères d'évaluation</FormLabel>
-//                                             <FormControl>
-//                                                 <Textarea
-//                                                     placeholder="Entrez les critères d'évaluation, détails du barème, etc."
-//                                                     className="min-h-32"
-//                                                     {...field}
-//                                                 />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//
-//                                 {/* File Upload */}
-//                                 <FileUploadSection
-//                                     onFileUpload={setSelectedFile}
-//                                 />
-//
-//                                 {/* Deadline field */}
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="deadline"
-//                                     render={({ field }) => (
-//                                         <DeadlineField field={field} />
-//                                     )}
-//                                 />
-//                             </div>
-//
-//                             {/* Students Management Section */}
-//                             <Card className="border border-border-light dark:border-border-dark">
-//                                 <CardHeader className="pb-2">
-//                                     <CardTitle className="text-xl flex items-center gap-2">
-//                                         <User className="h-5 w-5" /> Gestion des Élèves
-//                                     </CardTitle>
-//                                     <CardDescription>
-//                                         Ajoutez des élèves manuellement ou importez-les à partir d'un fichier CSV
-//                                     </CardDescription>
-//                                 </CardHeader>
-//                                 <CardContent>
-//                                     <div className="space-y-4">
-//                                         {/* Add Student Form */}
-//                                         <AddStudentForm onAddStudent={addStudent} />
-//
-//                                         {/* Students List */}
-//                                         <FormField
-//                                             control={form.control}
-//                                             name="students"
-//                                             render={() => (
-//                                                 <FormItem>
-//                                                     <div className="mt-4">
-//                                                         <div className="flex justify-between mb-2">
-//                                                             <FormLabel>Liste des élèves</FormLabel>
-//                                                             <span className="text-sm text-muted-foreground">
-//                                 {form.getValues().students?.length || 0} élèves
-//                               </span>
-//                                                         </div>
-//
-//                                                         <StudentsList
-//                                                             students={form.getValues().students || []}
-//                                                             onRemoveStudent={removeStudent}
-//                                                         />
-//                                                         <FormMessage />
-//                                                     </div>
-//                                                 </FormItem>
-//                                             )}
-//                                         />
-//                                     </div>
-//                                 </CardContent>
-//                             </Card>
-//
-//                             {/* Submit button */}
-//                             <div className="flex justify-end gap-3">
-//                                 <Button
-//                                     type="button"
-//                                     variant="outline"
-//                                     onClick={() => navigate('/professor')}
-//                                 >
-//                                     Annuler
-//                                 </Button>
-//                                 <Button
-//                                     type="submit"
-//                                     className="bg-data-teal hover:bg-data-teal/90"
-//                                     disabled={isSubmitting}
-//                                 >
-//                                     {isSubmitting ? (
-//                                         <span className="flex items-center gap-2">
-//                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-//                       Enregistrement...
-//                     </span>
-//                                     ) : (
-//                                         <span className="flex items-center gap-2">
-//                       <Save className="h-4 w-4" />
-//                       Créer l'examen
-//                     </span>
-//                                     )}
-//                                 </Button>
-//                             </div>
-//                         </form>
-//                     </Form>
-//                 </CardContent>
-//             </Card>
-//         </div>
-//     );
-// }
-//
-// export default CreateExam;
-
-
 import React, {useEffect, useState} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -345,18 +46,19 @@ function CreateExam() {
 
         const userId = user.id; // Implement this function to get the logged-in user ID
 
-        console.log(userId)
 
         // Listen for the correction pending event
         socket.on(`correctionPending:${userId}`, (data) => {
-            console.log(data.examId)
-            if (data.examId === createdExamData.id) {
-                console.log("gnewal waaay")
-                setModelCorrection(data.correction.content);
+            let correction = data.correction.replace(/###/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/```json|```/g, '')
+                .trim();
+            if (data.examId === createdExamData.exam.id) {
+                setModelCorrection(correction);
                 setViewState("CORRECTION");
                 setIsSubmitting(false);
             }
-        });
+        })
 
         return () => {
             socket.off(`correctionPending:${userId}`);
@@ -389,31 +91,18 @@ function CreateExam() {
                 deadline: new Date(data.deadline).toISOString(),
                 students: data.students,
             };
-            console.log("wouyay")
             console.log(selectedFile)
             if (selectedFile) {
                 payload.file = selectedFile;
                 payload.format = fileFormat;
             }
-
-            console.log("🚀 Envoi de la requête API...");
             const result = await examService.createExam(payload);
-            console.log("✅ Réponse reçue :", result);
 
             // Store created exam data for correction view
             setCreatedExamData({
                 ...result,
-                deadline: new Date(result.deadline)
+                deadline: result.exam.deadline
             });
-
-            // Simulate AI generating model correction
-            // // In a real implementation, this might be part of the API response or a separate API call
-            // setTimeout(() => {
-            //     setModelCorrection("Correction modèle générée pour l'examen: " + data.title + "\n\n" +
-            //         "Critères d'évaluation appliqués:\n" + data.gradingCriteria);
-            //     setViewState("CORRECTION");  // Switch to correction view
-            //     setIsSubmitting(false);
-            // }, 2000);
 
         } catch (error) {
             console.error('Error creating exam:', error);
@@ -433,7 +122,7 @@ function CreateExam() {
         if (fileName.endsWith('.md')) return "markdown";
         if (fileName.endsWith('.tex')) return "latex";
 
-        return "pdf"; // Default fallback
+        return "application/pdf"; // Default fallback
     };
 
     // Handle file change
@@ -452,7 +141,7 @@ function CreateExam() {
     //     setIsSubmitting(true);
     //     try {
     //         // Update with the actual API call to update the correction
-    //         await examService.updateExamCorrection(createdExamData.id, {
+    //         await examService.updateExamCorrection(createdExamData.exam.id, {
     //             content: modelCorrection,
     //             status: "final" // Change from "draft" to "final"
     //         });
@@ -551,9 +240,9 @@ function CreateExam() {
         setIsSubmitting(true);
         try {
             // This would be your API call to save the correction
-            // For example: await examService.updateExamCorrection(createdExamData.id, modelCorrection);
+            await examService.createExamCorrection(createdExamData.exam.id, modelCorrection);
 
-            toast.success(`L'examen "${createdExamData.title}" a été finalisé avec succès.`);
+            toast.success(`L'examen "${createdExamData.exam.title}" a été finalisé avec succès.`);
             navigate('/professor');
         } catch (error) {
             console.error('Error finalizing exam:', error);
@@ -561,10 +250,6 @@ function CreateExam() {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleFileUpload = (file) => {
-        setSelectedFile(file);
     };
 
     // Render function for create view
@@ -822,15 +507,11 @@ function CreateExam() {
             <CardContent>
                 <div className="space-y-6">
                     <div className="border rounded-md p-4 bg-muted/20">
-                        <h3 className="font-medium text-lg mb-2">{createdExamData?.title}</h3>
+                        <h3 className="font-medium text-lg mb-2">{createdExamData?.exam.title}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p className="text-muted-foreground">Date limite:</p>
-                                <p>{createdExamData?.deadline ? format(createdExamData.deadline, "PPP") : ""}</p>
-                            </div>
-                            <div>
-                                <p className="text-muted-foreground">Nombre d'élèves:</p>
-                                <p>{createdExamData?.students.length || 0} élèves</p>
+                                <p>{createdExamData?.exam.deadline ? format(createdExamData.deadline, "PPP") : ""}</p>
                             </div>
                         </div>
                     </div>

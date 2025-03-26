@@ -20,9 +20,9 @@ const Navbar = () => {
     // Tableau d'objets pour stocker les liens
     const navItems = [
         { label: "Home", path: "/" },
-        { label: "Features", path: "/features" },
-        { label: "About", path: "/about" },
-        { label: "Contact", path: "/contact" }
+        { label: "Features", path: "#features" },
+        { label: "About", path: "#about" },
+        { label: "Contact", path: "#contact" }
     ];
 
     return (
@@ -82,7 +82,7 @@ const Navbar = () => {
                         transition={{ duration: 0.5, delay: 0.4 }}
                     >
                         <Button variant="outline" className="outline-none bg-bg-light border-data-teal text-data-teal hover:bg-bg-dark hover:text-white">
-                            <Link to="login" className="text-inherit hover:text-inherit hover:border-inherit">
+                            <Link to="/login" className="text-inherit hover:text-inherit hover:border-inherit">
                                 Login
                             </Link>
 
@@ -93,7 +93,10 @@ const Navbar = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.5 }}
                     >
-                        <Button className="bg-data-teal text-white hover:bg-data-blue">Sign Up</Button>
+                        <Link to="/register">
+                            <Button className="bg-data-teal text-white hover:bg-data-blue">Sign Up</Button>
+                        </Link>
+
                     </motion.div>
                 </div>
             </div>
@@ -119,13 +122,24 @@ const Navbar = () => {
                             </Link>
                         ))}
                         <div className="flex flex-col space-y-2 pt-4 border-t border-border-light">
+                            <Link to="/login">
+                                <Button
+                                    variant="outline"
+                                    className="border-data-teal text-data-teal hover:bg-data-teal hover:text-white w-full"
+                                >
+                                    Login
+                                </Button>
+                            </Link>
                             <Button
                                 variant="outline"
                                 className="border-data-teal text-data-teal hover:bg-data-teal hover:text-white w-full"
                             >
                                 Login
                             </Button>
-                            <Button className="bg-data-teal text-white hover:bg-data-blue w-full">Sign Up</Button>
+                            <Link to="/register">
+                                <Button className="bg-data-teal text-white hover:bg-data-blue w-full">Sign Up</Button>
+                            </Link>
+
                         </div>
                     </div>
                 </motion.div>

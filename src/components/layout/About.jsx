@@ -1,6 +1,6 @@
 function InterfaceCard({ title, description, gradientFrom, gradientTo }) {
     return (
-        <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div id="about" className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             <div className={`h-2 bg-gradient-to-r from-${gradientFrom} to-${gradientTo}`}></div>
             <div className="p-8">
                 <div className="w-16 h-16 bg-gray-100 rounded-full mb-6"></div>

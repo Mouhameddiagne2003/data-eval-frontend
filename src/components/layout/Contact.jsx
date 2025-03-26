@@ -5,7 +5,7 @@ import { Mail, BookOpen, Github, Twitter, Linkedin } from "lucide-react"
 
 function ContactCard({ icon: Icon, title, description, linkText, linkHref }) {
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--color-border-light)] flex gap-4 hover:shadow-md transition-all duration-300">
+        <div id="contact" className="bg-white p-6 rounded-lg shadow-sm border border-[var(--color-border-light)] flex gap-4 hover:shadow-md transition-all duration-300">
             <div className="bg-[var(--color-data-teal)] rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0">
                 <Icon className="h-6 w-6 text-white" />
             </div>

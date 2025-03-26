@@ -13,9 +13,17 @@ export const login = async (email, password) => {
     }
 };
 
-export const logout = () => {
-    localStorage.removeItem("user");
-    window.location.href = "/login"; // Redirection après déconnexion
+export const logout = async () => {
+    try {
+        const response = await api.get("/auth/logout");
+        if (response) {
+            localStorage.removeItem("user");
+            window.location.href = "/login"; // Redirection après déconnexion
+        }
+    } catch (error) {
+        throw error.response?.data?.message || "Login failed";
+    }
+
 };
 
 export const registerUser = async (userData) => {

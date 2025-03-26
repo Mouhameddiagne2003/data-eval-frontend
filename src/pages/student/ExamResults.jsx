@@ -17,6 +17,17 @@ const ExamResults = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [submissions, setSubmissions] = useState([]);
 
+    useEffect(() => {
+        // 🎯 Écoute l'événement de soumission en erreur
+        socket.on("submissionError", ({ submissionId, message }) => {
+            console.log(`Erreur pour la soumission ${submissionId}: ${message}`);
+            toast.error(message);
+        });
+
+        // Cleanup du listener pour éviter les doublons
+        return () => socket.off("submissionError");
+    }, []);
+
     // 🔥 Charger les résultats de l'étudiant depuis l'API
     useEffect(() => {
         async function fetchSubmittedExams() {
