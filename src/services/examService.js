@@ -149,6 +149,19 @@ const examService = {
             throw error;
         }
     },
+    createExamCorrection: async (examId, correctionData) => {
+
+        try {
+            console.log("hyyyyyy")
+            console.log(correctionData)
+            const response = await api.post(`/exam/${examId}/correction`, { content: correctionData });
+            console.log("hyyyyyy")
+            return response.data;
+        } catch (error) {
+            console.error("❌ Erreur lors de la mise à jour de la correction :", error);
+            throw error;
+        }
+    }
 
 };
 

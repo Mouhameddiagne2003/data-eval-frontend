@@ -2,7 +2,7 @@ import {useEffect, useState} from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff } from "lucide-react"
 import { login } from "@/services/authService.js";
-import { useAuthStore } from "@/store/auth.js";
+import {handleLoginAttempt} from "@/store/auth.js";
 
 
 function LoginPage() {
@@ -14,7 +14,6 @@ function LoginPage() {
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate();
-    const { login: loginToStore } = useAuthStore();
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -30,9 +29,8 @@ function LoginPage() {
         setError(null);
         try {
             const {user, token} = await login(formData.email, formData.password);
-            loginToStore(user, token);
-            const rolePath = user.role;
-            navigate("/"+rolePath);
+            //loginToStore(user, token);
+            handleLoginAttempt(user, token, navigate);
         } catch (err) {
             setError(err);
         } finally {

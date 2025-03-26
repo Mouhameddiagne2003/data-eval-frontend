@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -9,16 +9,30 @@ import {
     Settings,
     History,
     GraduationCap,
-    Key
+    Key,
+    LogOut
 } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { logout } from "@/services/authService.js";
+import { useAuthStore } from "@/store/auth.js";
+
 
 const Sidebar = ({ userType }) => {
     const location = useLocation();
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const isMobile = useIsMobile();
+    const { logout: logoutToStore } = useAuthStore();
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
     // Define menu items based on user type
@@ -55,29 +69,6 @@ const Sidebar = ({ userType }) => {
         path: `/${userType}/settings`
     };
 
-    // User information based on user type
-    const userInfo = React.useMemo(() => {
-        const info = {
-            professor: {
-                name: 'M. Verstappen',
-                role: 'Professeur',
-                avatar: '/lovable-uploads/a5842e6e-3e6c-4bf6-b439-2dd54ebf584b.png'
-            },
-            student: {
-                name: 'A. Dupont',
-                role: 'Étudiant',
-                avatar: '/api/placeholder/32/32'
-            },
-            admin: {
-                name: 'Admin',
-                role: 'Administrateur',
-                avatar: '/api/placeholder/32/32'
-            }
-        };
-
-        return info[userType] || info.professor;
-    }, [userType]);
-
     // Sidebar menu item component
     const MenuItem = ({ icon: Icon, label, path }) => {
         const isActive = location.pathname === path;
@@ -103,43 +94,76 @@ const Sidebar = ({ userType }) => {
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon" className="md:!hidden">
-                        <Menu className="h-5 w-5" />
+                        <Menu className="" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-64 bg-sidebar-background text-sidebar-foreground">
+                <SheetContent side="left" className="pt-6 w-64 bg-white text-sidebar-foreground">
                     <SidebarContent />
                 </SheetContent>
             </Sheet>
         )
     );
+    const handleLogout = async () => {
+        // Close the dialog
+        setIsConfirmOpen(false)
 
+        await logout();
+
+        logoutToStore();
+    }
     // Sidebar content for both mobile and desktop
     const SidebarContent = () => (
-        <div className="p-4 space-y-6 h-full flex flex-col">
+        <div className="p-4 fixed space-y-6 h-screen flex flex-col">
             <div className="space-y-1">
                 {menuItems.map((item, index) => (
-                    <MenuItem key={index} icon={item.icon} label={item.label} path={item.path} />
+                    <MenuItem key={index} icon={item.icon} label={item.label} path={item.path}/>
                 ))}
             </div>
 
             <div className="border-t border-border-light dark:border-border-dark pt-4">
-                <MenuItem icon={settingsItem.icon} label={settingsItem.label} path={settingsItem.path} />
+                <MenuItem icon={settingsItem.icon} label={settingsItem.label} path={settingsItem.path}/>
             </div>
 
-            <div className="mt-auto p-4 border-t border-border-light dark:border-border-dark">
-                <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 rounded-full overflow-hidden">
-                        <img
-                            src={userInfo.avatar}
-                            alt="Profile"
-                            className="h-full w-full object-cover"
-                        />
-                    </div>
-                    <div>
-                        <div className="font-medium text-sm">{userInfo.name}</div>
-                        <div className="text-xs text-sidebar-foreground/70">{userInfo.role}</div>
-                    </div>
-                </div>
+        {/*    c un element de mon sidebar  <div className="flex items-center space-x-3 cursor-pointer">*/}
+        {/*    <div className="h-10 w-10 rounded-full overflow-hidden">*/}
+        {/*        <img*/}
+        {/*            src={userInfo.avatar}*/}
+        {/*            alt="Profile"*/}
+        {/*            className="h-full w-full object-cover"*/}
+        {/*        />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*        <div className="font-medium text-sm">{userInfo.name}</div>*/}
+        {/*        <div className="text-xs text-sidebar-foreground/70">{userInfo.role}</div>*/}
+        {/*    </div>*/}
+        {/*</div> c est le bas du sidebar concernant l avatar et nom professeur je veux si on clique labas qu il y ait deconnexion et si on clique y a demande de confirmation . fais un beau desig et propose autre menu aussi a part deconnexion si necessaire*/}
+
+            <div className="flex pb-64 items-center space-x-3 cursor-pointer bg-white">
+                <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                    <Button
+                        variant="ghost"
+                        className="w-auto justify-start text-sidebar-foreground hover:!bg-sidebar-accent hover:!text-sidebar-accent-foreground cursor-pointer"
+                        onClick={() => setIsConfirmOpen(true)}
+                    >
+                        <LogOut className="mr-2 h-5 w-5"/>
+                        <span>Déconnexion</span>
+                    </Button>
+                    <DialogContent className="sm:!max-w-[425px] bg-white ">
+                        <DialogHeader>
+                            <DialogTitle>Confirmer la déconnexion</DialogTitle>
+                            <DialogDescription>Êtes-vous sûr de vouloir vous déconnecter de votre compte
+                                ?</DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex space-x-2 justify-end">
+                            <Button variant="outline" className="cursor-pointer" onClick={() => setIsConfirmOpen(false)}>
+                                Annuler
+                            </Button>
+                            <Button variant="destructive" onClick={handleLogout} className="cursor-pointer">
+                                Déconnexion
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
@@ -147,11 +171,12 @@ const Sidebar = ({ userType }) => {
     return (
         <>
             {/* Mobile Trigger */}
-            <MobileTrigger />
+            <MobileTrigger/>
 
             {/* Desktop Sidebar */}
-            <aside className="w-56 border-r border-border-light dark:border-border-dark hidden md:!block flex-shrink-0 bg-sidebar-background text-sidebar-foreground">
-                <SidebarContent />
+            <aside
+                className="w-64 border-r border-border-light dark:border-border-dark hidden md:!block flex-shrink-0 bg-sidebar-background text-sidebar-foreground">
+                <SidebarContent/>
             </aside>
         </>
     );
