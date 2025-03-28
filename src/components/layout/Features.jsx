@@ -1,4 +1,5 @@
-import { Database, Activity, CheckCircle } from "lucide-react"
+import {BrainCircuit, FileText, MessageCircle, LayoutDashboard} from "lucide-react"
+import { motion } from "framer-motion";
 
 function FeatureCard({ icon: Icon, title, description, bgColor, iconColor }) {
     return (
@@ -18,56 +19,67 @@ function FeatureCard({ icon: Icon, title, description, bgColor, iconColor }) {
 function Features() {
     const features = [
         {
-            icon: Database,
-            title: "SQL Query Evaluation",
-            description: "Submit SQL queries and get instant feedback on syntax, performance, and correctness.",
+            icon: BrainCircuit,
+            title: "Correction automatique et intelligente",
+            description: "L'IA analyse et note les copies en quelques secondes, garantissant une correction rapide et juste.",
             bgColor: "bg-blue-100",
-            iconColor: "text-[var(--color-data-teal)]",
+            iconColor: "text-blue-500",
         },
         {
-            icon: Activity,
-            title: "Real Database Integration",
-            description: "Practice on real-world database schemas with safe execution environments.",
+            icon: FileText,
+            title: "Support de multiples formats",
+            description: "PDF, LaTeX, Markdown... Téléchargez vos sujets d'examen en toute simplicité.",
             bgColor: "bg-purple-100",
             iconColor: "text-purple-500",
         },
         {
-            icon: CheckCircle,
-            title: "Automated Assessment",
-            description: "Receive detailed scoring and feedback on every exercise automatically.",
+            icon: MessageCircle,
+            title: "Feedback détaillé et pédagogique",
+            description: "Chaque réponse est accompagnée d'une explication claire et constructive pour aider l'étudiant à progresser.",
             bgColor: "bg-green-100",
             iconColor: "text-green-500",
         },
-    ]
+        {
+            icon: LayoutDashboard,
+            title: "Interface intuitive et fluide",
+            description: "Une plateforme moderne, ergonomique et facile à utiliser pour enseignants et étudiants.",
+            bgColor: "bg-yellow-100",
+            iconColor: "text-yellow-500",
+        },
+    ];
 
     return (
         <section id="features" className="section-padding bg-white">
             <div className="container">
-                <div className="text-center max-w-3xl mx-auto mb-16">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.5 }}
+                    viewport={{ once: true }}
+                    className="text-center max-w-3xl mx-auto mb-16"
+                >
                     <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-data-blue)] mb-4">
-                        Powerful Features for SQL Learning and Evaluation
+                        Une correction automatisée, précise et rapide
                     </h2>
                     <p className="text-lg text-[var(--color-data-blue)]/80">
-                        Our platform provides comprehensive tools for learning, practicing, and evaluating SQL skills with instant
-                        feedback and detailed analytics.
+                        Découvrez comment Data-Eval transforme l'évaluation des examens grâce à l'IA.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true }}
+                    className="grid md:!grid-cols-4 gap-8"
+                >
                     {features.map((feature, index) => (
-                        <FeatureCard
-                            key={index}
-                            icon={feature.icon}
-                            title={feature.title}
-                            description={feature.description}
-                            bgColor={feature.bgColor}
-                            iconColor={feature.iconColor}
-                        />
+                        <FeatureCard key={index} {...feature} />
                     ))}
-                </div>
+                </motion.div>
             </div>
         </section>
-    )
+    );
 }
 
 export default Features

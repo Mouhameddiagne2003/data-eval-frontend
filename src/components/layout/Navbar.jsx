@@ -19,9 +19,9 @@ const Navbar = () => {
 
     // Tableau d'objets pour stocker les liens
     const navItems = [
-        { label: "Home", path: "/" },
-        { label: "Features", path: "#features" },
-        { label: "About", path: "#about" },
+        { label: "Accueil", path: "/" },
+        { label: "Fonctionnalités", path: "#features" },
+        { label: "A propos", path: "#about" },
         { label: "Contact", path: "#contact" }
     ];
 
@@ -61,7 +61,7 @@ const Navbar = () => {
                                 className=" text-bg-dark transition-colors relative group "
                             >
                                 {item.label}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-data-teal transition-all duration-300 group-hover:w-full"></span>
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-data-teal transition-all duration-300 group-hover:!w-full"></span>
                             </Link>
                         </motion.div>
                     ))}
@@ -81,9 +81,9 @@ const Navbar = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
                     >
-                        <Button variant="outline" className="outline-none bg-bg-light border-data-teal text-data-teal hover:bg-bg-dark hover:text-white">
-                            <Link to="/login" className="text-inherit hover:text-inherit hover:border-inherit">
-                                Login
+                        <Button variant="outline" className="cursor-pointer outline-none bg-bg-light border-data-teal text-data-teal hover:!bg-bg-dark hover:!text-white">
+                            <Link to="/login" className="text-inherit hover:!text-inherit hover:!border-inherit">
+                                Se connecter
                             </Link>
 
                         </Button>
@@ -94,7 +94,7 @@ const Navbar = () => {
                         transition={{ duration: 0.5, delay: 0.5 }}
                     >
                         <Link to="/register">
-                            <Button className="bg-data-teal text-white hover:bg-data-blue">Sign Up</Button>
+                            <Button className="bg-data-teal text-white hover:!bg-data-blue cursor-pointer">S'inscrire</Button>
                         </Link>
 
                     </motion.div>
@@ -104,7 +104,7 @@ const Navbar = () => {
             {/* Mobile Menu */}
             {mobileMenuOpen && (
                 <motion.div
-                    className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-border-light shadow-md"
+                    className="md:!hidden absolute top-full left-0 right-0 bg-white border-b border-border-light shadow-md"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -115,7 +115,7 @@ const Navbar = () => {
                             <Link
                                 key={item.label}
                                 to={item.path}
-                                className="text-data-blue hover:text-data-teal transition-colors py-2"
+                                className="text-data-blue hover:!text-data-teal transition-colors py-2"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {item.label}
@@ -125,19 +125,13 @@ const Navbar = () => {
                             <Link to="/login">
                                 <Button
                                     variant="outline"
-                                    className="border-data-teal text-data-teal hover:bg-data-teal hover:text-white w-full"
+                                    className="border-data-teal text-data-teal hover:!bg-data-teal hover:!text-white w-full"
                                 >
-                                    Login
+                                    Connexion
                                 </Button>
                             </Link>
-                            <Button
-                                variant="outline"
-                                className="border-data-teal text-data-teal hover:bg-data-teal hover:text-white w-full"
-                            >
-                                Login
-                            </Button>
                             <Link to="/register">
-                                <Button className="bg-data-teal text-white hover:bg-data-blue w-full">Sign Up</Button>
+                                <Button className="bg-data-teal text-white hover:!bg-data-blue w-full">Inscription</Button>
                             </Link>
 
                         </div>

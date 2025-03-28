@@ -1,6 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useAuthStore } from "@/store/auth";
-import { useEffect, useState } from "react";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import Layout from "@/components/layout/Layout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -19,6 +17,7 @@ import AdminRoles from "@/pages/admin/AdminRoles";
 import AdminExams from "@/pages/admin/AdminExams";
 import "./App.css"
 import { SessionCheckWrapper } from '@/middlewares/sessionMiddleware';
+import NotFound from "@/pages/NotFound.jsx";
 
 function App() {
     return (
@@ -58,6 +57,8 @@ function App() {
                             <Route path="exams" element={<AdminExams />} />
                         </Route>
                     </Route>
+                    {/* Route 404 - doit être en dernier */}
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </SessionCheckWrapper>
 

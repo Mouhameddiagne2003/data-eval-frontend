@@ -2,17 +2,16 @@ import { Database } from "lucide-react"
 
 function Hero() {
     return (
-        <section className="py-16 md:py-24 bg-gradient-to-br from-[var(--color-bg-light)] to-[var(--color-muted-light)]">
-            <div className="container grid md:grid-cols-2 gap-12 items-center">
+        <section className="py-16 md:!py-32 bg-gradient-to-br from-[var(--color-bg-light)] to-[var(--color-muted-light)]">
+            <div className="container grid md:!grid-cols-2 gap-12 items-center">
                 <div className="fade-in">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-data-blue)] mb-6">
-                        <span className="block">Automated SQL</span>
-                        <span className="block">Evaluation for</span>
-                        <span className="block text-[var(--color-data-light-blue)]">Better Learning</span>
+                    <h1 className="text-4xl md:!text-5xl lg:!text-6xl font-bold text-[var(--color-data-blue)] mb-6">
+                        <span className="block">Révolutionnez la </span>
+                        <span className="block"> correction de vos</span>
+                        <span className="block text-[var(--color-data-light-blue)]"> examens avec l'IA !</span>
                     </h1>
                     <p className="text-lg text-[var(--color-data-blue)]/80 mb-8">
-                        Improve your database skills with instant feedback on SQL queries. The perfect platform for students,
-                        teachers, and database professionals.
+                        Gagnez du temps, améliorez la précision et offrez un retour détaillé aux étudiants grâce à Data-Eval.
                     </p>
                     <div className="flex flex-wrap gap-4">
                         <a href="#contact" className="btn-primary text-lg flex items-center gap-2">
