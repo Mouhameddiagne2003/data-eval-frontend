@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Mail, BookOpen, Github, Twitter, Linkedin } from "lucide-react"
 
@@ -54,55 +52,44 @@ function Contact() {
             <div className="container grid md:grid-cols-2 gap-12">
                 <div>
                     <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-data-blue)] mb-6">
-                        Ready to Improve Your Database Skills?
+                        Contactez-nous
                     </h2>
                     <p className="text-lg text-[var(--color-data-blue)]/80 mb-8">
-                        Join thousands of students and professionals who are mastering SQL and database concepts with our
-                        comprehensive learning platform.
+                        Vous avez une question, une suggestion ou un retour ?
+                        Notre équipe est à votre écoute. Remplissez le formulaire
+                        et nous vous répondrons dans les meilleurs délais.
                     </p>
 
                     <div className="space-y-6">
                         <ContactCard
                             icon={Mail}
-                            title="Contact Us"
-                            description="Have questions or feedback? Reach out to our team."
-                            linkText="contact@data-eval.com"
-                            linkHref="mailto:contact@data-eval.com"
+                            title="Support"
+                            description="Besoin d'aide ? Contactez-nous directement."
+                            linkText="support@data-eval.com"
+                            linkHref="mailto:support@data-eval.com"
                         />
 
                         <ContactCard
                             icon={BookOpen}
                             title="Documentation"
-                            description="Explore our detailed documentation and user guides."
-                            linkText="View Documentation"
-                            linkHref="#"
+                            description="Découvrez notre documentation et guide d'utilisation"
+                            linkText="Consulter la documentation"
+                            linkHref="/docs"
                         />
-                    </div>
-
-                    <div className="flex gap-4 mt-8">
-                        {socialIcons.map((social, index) => {
-                            const Icon = social.icon
-                            return (
-                                <a
-                                    key={index}
-                                    href={social.href}
-                                    className="bg-white p-2 rounded-full border border-[var(--color-border-light)] hover:bg-[var(--color-muted-light)] transition-colors"
-                                >
-                                    <Icon className="h-5 w-5 text-[var(--color-data-blue)]" />
-                                </a>
-                            )
-                        })}
                     </div>
                 </div>
 
                 <div className="bg-white p-8 rounded-lg shadow-sm border border-[var(--color-border-light)]">
-                    <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mb-6">Get Started Today</h3>
+                    <h3 className="text-2xl font-bold text-[var(--color-data-blue)] mb-6">
+                        Envoyez-nous un Message
+                    </h3>
 
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label htmlFor="firstName" className="text-sm font-medium text-[var(--color-data-blue)]">
-                                    First Name
+                                <label htmlFor="firstName"
+                                       className="text-sm font-medium text-[var(--color-data-blue)]">
+                                    Prénom
                                 </label>
                                 <input
                                     type="text"
@@ -110,13 +97,14 @@ function Contact() {
                                     name="firstName"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    placeholder="John"
+                                    placeholder="Votre prénom"
                                     className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)]"
+                                    required
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="lastName" className="text-sm font-medium text-[var(--color-data-blue)]">
-                                    Last Name
+                                    Nom
                                 </label>
                                 <input
                                     type="text"
@@ -124,15 +112,16 @@ function Contact() {
                                     name="lastName"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    placeholder="Doe"
+                                    placeholder="Votre nom"
                                     className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)]"
+                                    required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="email" className="text-sm font-medium text-[var(--color-data-blue)]">
-                                Email Address
+                                Adresse E-mail
                             </label>
                             <input
                                 type="email"
@@ -140,14 +129,15 @@ function Contact() {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                placeholder="john.doe@example.com"
+                                placeholder="votre.email@exemple.com"
                                 className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)]"
+                                required
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="role" className="text-sm font-medium text-[var(--color-data-blue)]">
-                                Your Role
+                                Votre Rôle
                             </label>
                             <select
                                 id="role"
@@ -155,25 +145,49 @@ function Contact() {
                                 value={formData.role}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)]"
+                                required
                             >
-                                <option value="student">Student</option>
-                                <option value="teacher">Teacher</option>
-                                <option value="professional">Professional</option>
-                                <option value="other">Other</option>
+                                <option value="">Sélectionnez votre rôle</option>
+                                <option value="student">Étudiant</option>
+                                <option value="teacher">Enseignant</option>
+                                <option value="professional">Professionnel</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label htmlFor="subject" className="text-sm font-medium text-[var(--color-data-blue)]">
+                                Sujet
+                            </label>
+                            <select
+                                id="subject"
+                                name="subject"
+                                value={formData.subject}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)]"
+                                required
+                            >
+                                <option value="">Choisissez un sujet</option>
+                                <option value="support">Support technique</option>
+                                <option value="feature-request">Suggestion de fonctionnalité</option>
+                                <option value="bug-report">Signalement de bug</option>
+                                <option value="partnership">Partenariat</option>
+                                <option value="other">Autre</option>
                             </select>
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="message" className="text-sm font-medium text-[var(--color-data-blue)]">
-                                Message (Optional)
+                                Votre Message
                             </label>
                             <textarea
                                 id="message"
                                 name="message"
                                 value={formData.message}
                                 onChange={handleChange}
-                                placeholder="Your message..."
+                                placeholder="Écrivez votre message ici..."
                                 className="w-full px-3 py-2 border border-[var(--color-border-light)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-data-teal)] min-h-[120px]"
+                                required
                             />
                         </div>
 
@@ -181,11 +195,11 @@ function Contact() {
                             type="submit"
                             className="w-full bg-[var(--color-data-teal)] hover:bg-[var(--color-data-blue)] text-white py-3 rounded-md transition-colors duration-300"
                         >
-                            Request Demo Access
+                            Envoyer le Message
                         </button>
 
                         <p className="text-xs text-center text-[var(--color-data-blue)]/60 mt-4">
-                            By signing up, you agree to our Terms of Service and Privacy Policy.
+                            Nous vous répondrons dans les 48 heures.
                         </p>
                     </form>
                 </div>
